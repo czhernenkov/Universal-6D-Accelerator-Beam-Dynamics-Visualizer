@@ -1,0 +1,1882 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Universal 6D Accelerator Beam Dynamics Visualizer · v1.2.0</title>
+<style>
+:root{--bg:#070a10;--panel:#101621;--panel2:#151d2a;--border:#293547;--text:#eef3fa;--muted:#9eabbc;--cyan:#62d6ff;--gold:#ffbf5e;--rose:#ff6f8f;--green:#70e1a1;--blue:#55a8ff;--danger:#ff7a7a}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}body{min-height:100vh}.wrap{width:min(1600px,98vw);margin:auto;padding:14px}
+header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:10px}h1{font-size:22px;margin:0 0 4px}.sub{font-size:12px;color:var(--muted);line-height:1.45;max-width:1050px}
+.toolbar{display:flex;flex-wrap:wrap;gap:7px;align-items:center;background:var(--panel);border:1px solid var(--border);border-radius:9px;padding:9px;margin-bottom:8px}.toolbar label{font-size:11px;color:#dbe4f0;display:flex;gap:5px;align-items:center}.toolbar input[type=range]{width:115px}.toolbar input[type=number],.toolbar select{background:#1d2634;color:var(--text);border:1px solid #344154;border-radius:6px;padding:6px 8px;font-size:11px;width:90px}.toolbar input[type=number]{width:82px}.toolbar button,button{background:#1d2634;color:var(--text);border:1px solid #344154;border-radius:6px;padding:7px 10px;cursor:pointer;font-size:11px}button:hover{background:#263142}.control-note{color:var(--muted);font-size:10px;margin-left:auto}.value{min-width:48px;text-align:right;color:var(--cyan);font-variant-numeric:tabular-nums}
+.status{padding:6px 9px;margin-bottom:8px;border:1px solid rgba(112,225,161,.25);background:rgba(22,44,34,.35);border-radius:7px;color:#cdebdc;font-size:10px}.status.warn{border-color:rgba(255,122,122,.35);background:rgba(65,22,22,.28);color:#ffd0d0}
+.layout{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.panel{position:relative;background:var(--panel);border:1px solid var(--border);border-radius:9px;overflow:hidden;min-width:0}.panel.wide{grid-column:span 2}.panel.full{grid-column:1/-1}.panel-title{padding:7px 9px;font-size:12px;color:#e1e8f1;background:var(--panel2);border-bottom:1px solid var(--border)}
+.vizwrap{position:relative;width:100%;overflow:hidden;background:#0b1018}canvas.viz{display:block;width:100%;height:auto;background:#0b1018;cursor:crosshair;position:relative;z-index:2;touch-action:none}svg.picklayer{position:absolute;inset:0;width:100%;height:100%;z-index:4;pointer-events:none;overflow:visible}svg.picklayer circle.pick{pointer-events:all;cursor:pointer;fill:rgba(255,255,255,.001);stroke:transparent;stroke-width:0}svg.picklayer circle.pick:hover{stroke:rgba(255,255,255,.95);stroke-width:2;fill:rgba(255,255,255,.05)}
+.info{position:absolute;left:6px;top:32px;right:6px;pointer-events:none;user-select:none;display:flex;flex-direction:column;gap:3px;z-index:5}.card{background:rgba(8,12,18,.88);border:1px solid rgba(255,255,255,.22);border-radius:5px;padding:4px 6px;font-size:9px;line-height:1.15;backdrop-filter:blur(3px);box-shadow:0 2px 8px rgba(0,0,0,.22)}.cardhead{font-weight:700;margin-bottom:2px}.small{font-size:8px;color:#b8c2d0}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1px 8px}.tag{color:#aeb9c9}
+#cylPanel{position:absolute;right:7px;bottom:7px;width:285px;max-width:calc(100% - 14px);padding:6px 7px;background:rgba(7,11,16,.92);border:1px solid rgba(98,214,255,.34);border-radius:7px;font-size:9px;line-height:1.25;z-index:6;pointer-events:none;backdrop-filter:blur(3px)}#cylPanel.hidden{display:none}.cyl-title{font-weight:700;color:var(--cyan);margin-bottom:4px}.eq{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:8px;color:#d9e5f3}.cyl-row{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;margin-top:4px}
+#inspector{margin-top:9px}.inspector-head{display:flex;gap:7px;align-items:center;padding:7px 8px;background:var(--panel2);border-bottom:1px solid var(--border)}.inspector-head span{font-size:11px;color:var(--muted)}.inspector-inner{padding:8px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.inspect-block{background:#0c121b;border:1px solid #273244;border-radius:6px;padding:7px;font-size:10px;line-height:1.35}.inspect-block h3{font-size:11px;margin:0 0 5px;color:#dfe7f2}.inspect-value{display:flex;justify-content:space-between;gap:8px}.inspect-value span:first-child{color:#9facbd}.deep-btn{margin-top:5px;padding:4px 7px;font-size:9px}.matrix{font:8px ui-monospace,SFMono-Regular,Menlo,monospace;color:#d5deea;white-space:pre;overflow:auto;max-height:230px;padding:6px;background:#080d14;border:1px solid #1d2a39;border-radius:5px}
+.footer{color:var(--muted);font-size:10px;line-height:1.45;margin-top:8px}.pill{display:inline-block;border:1px solid #344154;border-radius:999px;padding:2px 7px;margin-right:4px;margin-bottom:3px}
+.legend{display:flex;gap:8px;align-items:center;padding:6px 8px;font-size:9px;color:var(--muted);border-top:1px solid var(--border)}
+.nl-note{font-size:10px;color:#aeb9c9;line-height:1.35}#cBucket{height:auto}.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+@media(max-width:1100px){.inspector-inner{grid-template-columns:1fr 1fr}.panel.wide{grid-column:span 3}}@media(max-width:760px){.layout{grid-template-columns:1fr}.panel.wide,.panel.full{grid-column:auto}.inspector-inner{grid-template-columns:1fr}.control-note{margin-left:0}.toolbar input[type=range]{width:90px}}
+
+.research-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;padding:8px}.research-card{background:#0c121b;border:1px solid #273244;border-radius:7px;padding:7px}.research-card h3{font-size:11px;margin:0 0 5px;color:#dfe7f2}.research-card .rsmall{font-size:9px;color:#9eabbc;line-height:1.35}.research-card button{margin:3px 3px 0 0}.research-card input,.research-card select{max-width:100%;background:#1d2634;color:var(--text);border:1px solid #344154;border-radius:5px;padding:4px;font-size:9px}.research-output{grid-column:1/-1;background:#080d14;border:1px solid #1d2a39;border-radius:6px;padding:7px;font:9px ui-monospace,SFMono-Regular,Menlo,monospace;color:#d5deea;white-space:pre-wrap;max-height:240px;overflow:auto}.research-good{color:#70e1a1}.research-warn{color:#ffbf5e}.research-bad{color:#ff7a7a}
+@media(max-width:1100px){.research-grid{grid-template-columns:1fr 1fr}}@media(max-width:760px){.research-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><div><h1>Universal 6D Accelerator Beam Dynamics Visualizer</h1><div class="sub">Generic element-by-element transport with transverse phase space, longitudinal phase space, cylindrical diagnostics, 3D beamline motion, RF phase, and Courant–Snyder actions.</div></div></header>
+
+<div class="toolbar">
+  <button id="play">Pause</button><button id="step">Step</button><button id="reset">Reset</button><button id="resetZoom">Reset Zoom</button>
+  <label>Speed <select id="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option><option value="8">8×</option></select></label>
+  <label>Machine <select id="machine"><option value="fodo">Matched FODO + RF</option><option value="ring">Closed Ring Sector + RF</option></select></label>
+  <label>Optics <select id="opticsMode"><option value="phase">Phase advance</option><option value="k">Quad strength</option></select></label>
+  <label>μx/cell <input id="phaseSlider" type="range" min="20" max="120" step="1" value="60"><span id="phaseVal" class="value">60°</span></label>
+  <label>KQ <input id="kSlider" type="range" min="0" max="0.70" step="0.001" value="0.10"><span id="kVal" class="value">0.100</span></label>
+  <label>FODO θ [mrad] <input id="bendTheta" type="number" min="10" max="300" step="5" value="80"></label>
+</div>
+<div class="toolbar">
+  <label>RF V [GeV] <input id="rfV" type="number" min="0" max="0.001" step="0.000001" value="0.000040"></label>
+  <label>φs [rad] <input id="phiS" type="number" min="-3.1415926535" max="3.1415926535" step="0.0001" value="3.1415926536"></label>
+  <label>Dipole L [m] <input id="dipL" type="number" min="0.25" max="3" step="0.05" value="1.00"></label>
+  <label>Ring cells <input id="ringCells" type="number" min="8" max="64" step="1" value="12"></label>
+  <label>Ref. energy [GeV] <input id="energy" type="number" min="0.05" max="20" step="0.05" value="1.00"></label>
+  <label>Orbit kick [mrad] <input id="orbitKick" type="number" min="-1" max="1" step="0.01" value="0.00"></label>
+  <label><input id="showAll3D" type="checkbox" checked> All 3D particle paths</label>
+  <div class="control-note"><span id="frameTxt">step 0</span> · <span id="sTxt">s = 0.000 m</span> · <span id="selTxt">selected: none</span></div>
+</div>
+
+<div class="toolbar">
+  <label>RF gap L [m] <input id="rfGapL" type="number" min="0.02" max="5" step="0.01" value="0.10"></label>
+  <label>RF mode <select id="rfMode"><option value="standing" selected>Standing-wave gap</option><option value="traveling">Travelling-wave surrogate</option></select></label>
+  <label>Sextupole K₂ [m⁻³] <input id="sextK" type="number" min="-500" max="500" step="1" value="0"></label>
+  <label>Octupole K₃ [m⁻⁴] <input id="octK" type="number" min="-5000" max="5000" step="5" value="0"></label>
+  <label>Fringe [% L] <input id="fringe" type="range" min="0" max="30" step="1" value="0"><span id="fringeVal" class="value">0%</span></label>
+  <label>Symplectic slice [mm] <input id="intStep" type="number" min="0.2" max="50" step="0.2" value="20.0"></label>
+</div>
+<div class="toolbar">
+  <label>Aperture [mm] <input id="aperture" type="number" min="1" max="100" step="0.5" value="50"></label>
+  <label>Aperture shape <select id="apertureShape"><option value="circle" selected>circle</option><option value="ellipse">ellipse</option><option value="rectangle">rectangle</option></select></label>
+  <label>Solenoid Bz [T] <input id="solenoidB" type="number" min="-5" max="5" step="0.01" value="0"></label>
+  <label>Solenoid L [m] <input id="solenoidL" type="number" min="0.05" max="5" step="0.05" value="0.50"></label>
+  <label><input id="radiation" type="checkbox" disabled> Classical synchrotron radiation (disabled in symplectic mode)</label>
+  <label><input id="quantumRecoil" type="checkbox" disabled> Effective quantum photon recoil (disabled in symplectic mode)</label>
+  <span class="nl-note">Primary tracking: canonical paraxial element maps with a fourth-order Yoshida drift-kick-drift integrator for quadrupoles, exact thin multipole kicks, and nonlinear RF kicks. Radiation and imported 3-D field-map tracking are not active in this Hamiltonian mode.</span>
+</div>
+
+<section class="panel full" id="particleImportPanel" style="margin:10px 0;border-color:#31516a">
+  <div class="panel-title">Import accelerator particle data · optional input override</div>
+  <div style="padding:10px;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;align-items:end">
+    <div><label style="display:block;margin-bottom:5px">Particle distribution file</label><input id="particleDataFile" type="file" accept=".csv,.tsv,.txt,.json,application/json,text/csv" style="max-width:100%"></div>
+    <div><label style="display:block;margin-bottom:5px">Position units (auto from headers by default)</label><select id="particlePositionUnits"><option value="auto" selected>Auto / infer from header</option><option value="m">meters (m)</option><option value="mm">millimeters (mm)</option><option value="um">micrometers (µm)</option></select></div>
+    <div><label style="display:block;margin-bottom:5px">Slope units (auto from headers by default)</label><select id="particleSlopeUnits"><option value="auto" selected>Auto / infer from header</option><option value="rad">radians (rad)</option><option value="mrad">milliradians (mrad)</option><option value="urad">microradians (µrad)</option></select></div>
+    <div><label style="display:block;margin-bottom:5px">Transverse momentum columns</label><select id="particleMomentumMode"><option value="auto" selected>Auto: xp/yp are slopes; px/py canonical</option><option value="slopes">Treat px/py as slopes</option><option value="canonical">Treat px/py as normalized canonical momenta</option></select></div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap"><button id="loadParticleData" type="button">Load & simulate data</button><button id="clearParticleData" type="button">Restore default beam</button></div>
+  </div>
+  <div id="particleDataStatus" class="research-output" style="margin:0 10px 10px;max-height:180px">Using the built-in matched Gaussian beam. No external particle file is active.</div>
+  <div class="nl-note" style="padding:0 10px 10px">Accepted: CSV/TSV/TXT with a header row, or JSON array / {"particles":[...]}. Recognized columns include x, xp/xprime, y, yp/yprime, z, delta/dpp; px/py are supported with the momentum convention selector. Coordinate and slope units may be encoded in column names (for example x_mm, xp_mrad, z_um). Missing coordinates default to zero. Each row is treated as one particle at the lattice entrance; the uploaded distribution replaces the default beam only after successful import. This imports particle coordinates, not magnet settings or field maps.</div>
+</section>
+<div id="status" class="status">Model initialized. Internal coordinates are SI units (m, rad, Δp/p).</div>
+
+<div class="layout">
+  <section class="panel"><div class="panel-title">x–x′ phase space · x [mm], x′ [mrad] · heat map + 1σ/2σ/3σ ellipses</div><div class="vizwrap"><canvas id="cxx" class="viz" width="660" height="440"></canvas><svg id="pick_cxx" class="picklayer" viewBox="0 0 660 440" preserveAspectRatio="none"></svg></div><div id="ixx" class="info"></div></section>
+  <section class="panel"><div class="panel-title">y–y′ phase space · y [mm], y′ [mrad] · heat map + 1σ/2σ/3σ ellipses</div><div class="vizwrap"><canvas id="cyy" class="viz" width="660" height="440"></canvas><svg id="pick_cyy" class="picklayer" viewBox="0 0 660 440" preserveAspectRatio="none"></svg></div><div id="iyy" class="info"></div></section>
+  <section class="panel"><div class="panel-title">x–y transverse plane · x [mm], y [mm] · heat map</div><div class="vizwrap"><canvas id="cxy" class="viz" width="660" height="440"></canvas><svg id="pick_cxy" class="picklayer" viewBox="0 0 660 440" preserveAspectRatio="none"></svg></div><div id="ixy" class="info"></div><div id="cylPanel" class="hidden"></div></section>
+  <section class="panel"><div class="panel-title">Longitudinal phase space · z [mm], δ = Δp/p₀ · heat map</div><div class="vizwrap"><canvas id="czd" class="viz" width="660" height="440"></canvas><svg id="pick_czd" class="picklayer" viewBox="0 0 660 440" preserveAspectRatio="none"></svg></div><div id="izd" class="info"></div></section>
+  <section class="panel wide"><div class="panel-title">3D beamline · physical bent reference orbit + all particle paths</div><div class="vizwrap"><canvas id="c3d" class="viz" width="1080" height="440"></canvas><svg id="pick_c3d" class="picklayer" viewBox="0 0 1080 440" preserveAspectRatio="none"></svg></div><div class="legend"><span><i class="dot" style="background:#62d6ff"></i> selected 1</span><span><i class="dot" style="background:#ffbf5e"></i> selected 2</span><span><i class="dot" style="background:#ff6f8f"></i> selected 3</span><span>dipole = green · QF = blue · QD = red · RF = gold</span></div></section>
+  <section class="panel wide"><div class="panel-title">3D beamline · longitudinal s with lateral x,y motion</div><div class="vizwrap"><canvas id="c3s" class="viz" width="1080" height="440"></canvas><svg id="pick_c3s" class="picklayer" viewBox="0 0 1080 440" preserveAspectRatio="none"></svg></div><div class="legend"><span><i class="dot" style="background:#62d6ff"></i> selected 1</span><span><i class="dot" style="background:#ffbf5e"></i> selected 2</span><span><i class="dot" style="background:#ff6f8f"></i> selected 3</span><span>dipole = green · QF = blue · QD = red · RF = gold</span></div></section>
+  <section class="panel"><div class="panel-title">RF phase / normalized energy</div><canvas id="crf" class="viz" width="620" height="400"></canvas><div id="irf" class="info"></div></section>
+  <section class="panel full"><div class="panel-title">Transport optics · periodic βx, βy + current position</div><canvas id="transport" class="viz" width="1860" height="300"></canvas></section>
+  <section class="panel full"><div class="panel-title">Dispersion / momentum-dependent path effects</div><canvas id="dispersion" class="viz" width="1860" height="260"></canvas></section>
+  <section class="panel full"><div class="panel-title">Physics validation · first-order 6D map / symplecticity / integration resolution</div><canvas id="validation" class="viz" width="1860" height="260"></canvas></section>
+
+  <section class="panel wide"><div class="panel-title">Nonlinear RF bucket / synchrotron pendulum · exact sine force · Tecker Hamiltonian diagnostic</div><div class="vizwrap"><canvas id="cBucket" class="viz" width="1080" height="360"></canvas></div></section>
+</div>
+
+<section id="researchLab" class="panel full">
+<div class="panel-title">Diagnostic · field maps · symplectic maps · closed orbit · multi-turn tune / resonance / dynamic aperture · benchmarks <span style="float:right;color:#62d6ff;font-size:11px">v1.2.0 · particle import build</span></div>
+<div class="research-grid">
+  <div class="research-card"><h3>Integrator / Hamiltonian mode</h3>
+    <label class="rsmall">Analysis map <select id="researchIntegrator"><option value="symplectic" selected>Canonical symplectic element-map composition</option><option value="linear6d">Exact linear 6D element maps</option></select></label><br>
+    <label class="rsmall">Turns <input id="researchTurns" type="number" min="16" max="20000" step="16" value="1024"></label>
+    <button id="runMultiTurn">Run multi-turn analysis</button><button id="runValidation">Run validation suite</button>
+  </div>
+  <div class="research-card"><h3>3-D field map</h3>
+    <input id="fieldMapFile" type="file" accept=".csv,.txt"><br>
+    <label class="rsmall"><input id="fieldMapEnable" type="checkbox" disabled> use imported E/B map in tracker (not active in symplectic mode)</label>
+    <div id="fieldMapStatus" class="rsmall">No field map loaded.</div>
+    <button id="clearFieldMap">Clear map</button><br><input id="benchmarkFile" type="file" accept=".json"> <span class="rsmall">reference benchmark JSON</span>
+  </div>
+  <div class="research-card"><h3>Closed orbit / coupled optics</h3>
+    <button id="solveClosedOrbit">Solve closed orbit</button><button id="exportMap">Export 6D map JSON</button>
+    <button id="normalModes">Compute normal modes</button>
+    <div class="rsmall">Uses the actual assembled one-turn 6×6 map. Orbit-kick and transverse coupling are reported separately from the ideal reference orbit.</div>
+  </div>
+  <div class="research-card"><h3>Nonlinear studies</h3>
+    <label class="rsmall">Amplitude [σ] <input id="dynAmp" type="number" min="0.1" max="20" step="0.1" value="1"></label>
+    <button id="runDynAperture">Dynamic aperture scan</button>
+    <button id="runResonance">Resonance / tune scan</button>
+    <div class="rsmall">Hamiltonian studies automatically disable radiation and stochastic recoil.</div>
+    <div class="rsmall" style="margin-top:8px;line-height:1.5">
+      <b>Tracking method:</b> canonical paraxial element-map composition with exact linear transport and nonlinear sextupole/octupole/RF kicks. The map is intended for Hamiltonian studies; radiation and stochastic recoil are excluded. Imported 3-D field maps are retained as import infrastructure but are not integrated by this paraxial symplectic tracker.
+      <br><b>References:</b> <a href="https://uspas.fnal.gov/materials/08UCSC/Accelerator_Physics1.pdf" target="_blank" rel="noopener">USPAS Accelerator Physics (Litvinenko, Pozdeyev, Satogata)</a> · <a href="https://technotes.bnl.gov/PDF?publicationId=31958" target="_blank" rel="noopener">MacKay, Thoughts on Healy’s Symplectification Algorithm (BNL C-A/AP/215)</a> · <a href="https://cds.cern.ch/record/170941/files/p15.pdf" target="_blank" rel="noopener">Forest, Symplectic integration (1987)</a> · <a href="https://doi.org/10.1016/0375-9601(90)90092-3" target="_blank" rel="noopener">Yoshida, fourth-order symplectic composition (1990)</a> · <a href="https://www.classe.cornell.edu/bmad/basic_manual.html" target="_blank" rel="noopener">Bmad manual</a>.
+    </div>
+  </div>
+  <div class="research-output" id="researchOutput">Diagnostics idle. v1.2.0 uses canonical paraxial element maps. Run the validation suite before interpreting quantitative results.</div>
+</div></section>
+
+<section id="inspector" class="panel">
+  <div class="inspector-head"><span>Selected-particle inspector</span><span id="levelText">Level 1 · click the same particle again or use “Go deeper”</span></div>
+  <div id="inspectorBody" class="inspector-inner"><div class="inspect-block">Click a particle in a phase-space plot or the 3D beamline. Up to 3 particles can be selected. Repeated clicks on the same particle progressively reveal deeper physics.</div></div>
+</section>
+
+<div class="footer">
+  <span class="pill">importable particle distributions</span><span class="pill">100 particles default</span><span class="pill">3σ beam ellipses</span><span class="pill">phase-space heat maps</span><span class="pill">up to 3 selections</span><span class="pill">wheel zoom</span><span class="pill">progressive Levels 1–6</span>
+  <br>The lattice/optics matrices remain diagnostics; primary tracking composes canonical paraxial element maps with a fourth-order Yoshida split for quadrupoles and nonlinear Hamiltonian kicks. Longitudinal tracking uses a canonical sinusoidal RF kick and slip-factor/transition diagnostics; the RF bucket and separatrix are educational Hamiltonian diagnostics. This build does not apply radiation damping, finite-gap RF transit-time effects, or imported 3-D field maps to particle trajectories. Quantitative machine modeling requires validated field/cavity maps and benchmarking against an established tracking code. <a href="https://cds.cern.ch/record/1982417/files/1-21%20Tecker.pdf" target="_blank" rel="noopener" style="color:#62d6ff">Tecker / CERN PDF (21 pp.)</a>. Density numbers/bars are intentionally omitted; the heat maps are visual density only.
+</div>
+</div>
+
+<script>
+
+'use strict';
+
+const CFG={
+  N:100,
+  emitX:0.30e-6,
+  emitY:0.30e-6,
+  emitZ:6.0e-6,
+  betaZ:2.6666666667,
+  alphaZ:0,
+  referenceEnergyGeV:1.0,
+  rfFrequency:1497e6,
+  rfVoltageGeV:4.0e-5,
+  synchronousPhase:Math.PI,
+  dipoleLength:1.0,
+  ringCells:12,
+  orbitKickMr:0,
+  maxSelected:3,
+  fodoCells:5.5,
+  fodoTheta:0.08,
+  qfLength:1.0,
+  dipoleCountPerCell:2,
+  drifts:[1.0,1.0,1.0,1.0],
+  c:299792458,
+  meGeV:0.00051099895,
+  maxAbsState:1e6,
+  engeCoefficients:[-0.7,1.0,0,0,0],
+  solenoidFieldT:0,
+  solenoidLength:0.50,
+  apertureShape:'circle',
+  apertureX:0.050,
+  apertureY:0.050,
+  fieldMaps:new Map(),
+  importedFieldMap:null,
+  useImportedFieldMap:false,
+  researchTurns:1024,
+  researchIntegrator:'symplectic'
+};
+const COLORS=['#62d6ff','#ffbf5e','#ff6f8f'];
+const FULL={xx:{x:[-13,13],y:[-0.70,0.70]},yy:{x:[-13,13],y:[-0.70,0.70]},xy:{x:[-13,13],y:[-13,13]},zd:{x:[-20,20],y:[-0.008,0.008]},rf:{x:[-Math.PI,Math.PI],y:[0,1.04]}};
+const ZOOM={}; for(const k of Object.keys(FULL)) ZOOM[k]={x:[...FULL[k].x],y:[...FULL[k].y]};
+
+let seed=7;
+function resetSeed(){seed=7;}
+function rand(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;}
+function gaussianPair(){let u=0,v=0,w=0;do{u=2*rand()-1;v=2*rand()-1;w=u*u+v*v}while(w<=1e-15||w>=1);const m=Math.sqrt(-2*Math.log(w)/w);return [u*m,v*m];}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function finite(v,d=0){return Number.isFinite(v)?v:d;}
+
+function mat2Mul(A,B){return [[A[0][0]*B[0][0]+A[0][1]*B[1][0],A[0][0]*B[0][1]+A[0][1]*B[1][1]],[A[1][0]*B[0][0]+A[1][1]*B[1][0],A[1][0]*B[0][1]+A[1][1]*B[1][1]]];}
+function mat6Mul(A,B){const C=Array.from({length:6},()=>Array(6).fill(0));for(let i=0;i<6;i++)for(let k=0;k<6;k++){const aik=A[i][k];if(aik===0)continue;for(let j=0;j<6;j++)C[i][j]+=aik*B[k][j];}return C;}
+function identity6(){return Array.from({length:6},(_,i)=>Array.from({length:6},(_,j)=>i===j?1:0));}
+function apply6(M,q){const v=[q.x,q.xp,q.y,q.yp,q.z,q.d],o=M.map(row=>row.reduce((s,a,j)=>s+a*v[j],0));q.x=o[0];q.xp=o[1];q.y=o[2];q.yp=o[3];q.z=o[4];q.d=o[5];}
+function gammaFrom(beta,alpha){return (1+alpha*alpha)/beta;}
+function twissFromM(M){
+  const tr=M[0][0]+M[1][1];
+  if(Math.abs(tr)>=2-1e-10)return null;
+  const sinMu=Math.sqrt(Math.max(1-tr*tr/4,1e-30));
+  const mu=Math.acos(clamp(tr/2,-1,1));
+  const beta=M[0][1]/sinMu;
+  const alpha=(M[0][0]-M[1][1])/(2*sinMu);
+  const gamma=(1+alpha*alpha)/beta;
+  if(!(beta>0)&&Number.isFinite(beta))return null;
+  return {mu,beta,alpha,gamma,trace:tr};
+}
+function periodicCov(beta,alpha,emit){return [[emit*beta,-emit*alpha],[-emit*alpha,emit*gammaFrom(beta,alpha)]];}
+function covProp(S,M){return [[M[0][0]*M[0][0]*S[0][0]+2*M[0][0]*M[0][1]*S[0][1]+M[0][1]*M[0][1]*S[1][1],M[0][0]*M[1][0]*S[0][0]+(M[0][0]*M[1][1]+M[0][1]*M[1][0])*S[0][1]+M[0][1]*M[1][1]*S[1][1]],[M[0][0]*M[1][0]*S[0][0]+(M[0][0]*M[1][1]+M[0][1]*M[1][0])*S[0][1]+M[0][1]*M[1][1]*S[1][1],M[1][0]*M[1][0]*S[0][0]+2*M[1][0]*M[1][1]*S[0][1]+M[1][1]*M[1][1]*S[1][1]]];}
+
+function rel(){const g=CFG.referenceEnergyGeV/CFG.meGeV;const b=Math.sqrt(Math.max(1-1/(g*g),1e-30));return {gamma:g,beta:b};}
+function effectiveRFFrequency(){if(machineKind!=='ring')return CFG.rfFrequency;const {beta}=rel();const C=cellLength()*clamp(Math.round(CFG.ringCells),8,64);const h=Math.max(1,Math.round(CFG.rfFrequency*C/(beta*CFG.c)));return h*beta*CFG.c/C;}
+function drift2(L){return [[1,L],[0,1]];}
+function quad2(L,k){if(Math.abs(k)<1e-14)return drift2(L);if(k>0){const s=Math.sqrt(k),a=s*L,c=Math.cos(a),sn=Math.sin(a);return [[c,sn/s],[-s*sn,c]];}const s=Math.sqrt(-k),a=s*L,c=Math.cosh(a),sn=Math.sinh(a);return [[c,sn/s],[s*sn,c]];}
+function quadY2(L,k){return quad2(L,-k);}
+function sector2(L,rho){const rr=Math.max(Math.abs(rho),1e-12),sg=Math.sign(rho)||1,th=L/rho,c=Math.cos(th),sn=Math.sin(th);return [[c,rr*sn*sg],[-sn/(rr*sg),c]];}
+function sector6(L,rho){
+  const rr=rho===0?1e-12:rho,th=L/rr,c=Math.cos(th),sn=Math.sin(th);const M=identity6();
+  M[0][0]=c;M[0][1]=rho*sn;M[0][5]=rho*(1-c);
+  M[1][0]=-sn/rho;M[1][1]=c;M[1][5]=sn;
+  M[2][3]=L;
+  M[4][0]=-sn;M[4][1]=-rho*(1-c);M[4][5]=rho*(th-sn);
+  return M;
+}
+function rectBend6(L,rho){const th=L/rho;const p=identity6();const t=Math.tan(th/2)/rho;p[1][0]=t;p[3][2]=-t;return mat6Mul(p,mat6Mul(sector6(L,rho),p));}
+function combinedBend6(L,rho,n){const G=1/rho,kx2=(1-n)*G*G,ky2=n*G*G;const kx=Math.sqrt(Math.abs(kx2)),ky=Math.sqrt(Math.abs(ky2));const M=identity6();
+  let Cx=1,Sx=L,Cy=1,Sy=L;if(kx>1e-14){Cx=Math.cos(kx*L);Sx=Math.sin(kx*L)/kx;}if(ky>1e-14){Cy=Math.cos(ky*L);Sy=Math.sin(ky*L)/ky;}
+  M[0][0]=Cx;M[0][1]=Sx;M[1][0]=-kx2*Sx;M[1][1]=Cx;M[2][2]=Cy;M[2][3]=Sy;M[3][2]=-ky2*Sy;M[3][3]=Cy;
+  M[0][5]=G*(1-Cx)/Math.max(kx2,1e-30);M[1][5]=G*Sx;M[4][0]=-G*Sx;M[4][1]=-G*(1-Cx)/Math.max(kx2,1e-30);M[4][5]=kx>1e-14?G*G*(kx*L-Math.sin(kx*L))/(kx2*kx):0;return M;}
+function solenoid6(L,K){if(Math.abs(K)<1e-12)return makeDrift6(L);const M=identity6(),a=K*L,C=Math.cos(a),S=Math.sin(a),inv=1/K;M[0][0]=C*C;M[0][1]=S*C*inv;M[0][2]=S*C;M[0][3]=S*S*inv;M[1][0]=-K*S*C;M[1][1]=C*C;M[1][2]=-K*S*S;M[1][3]=S*C;M[2][0]=-S*C;M[2][1]=-S*S*inv;M[2][2]=C*C;M[2][3]=S*C*inv;M[3][0]=K*S*S;M[3][1]=-S*C;M[3][2]=-K*S*C;M[3][3]=C*C;return M;}
+function slip6(L){const {gamma,beta}=rel();const M=identity6();M[4][5]=L/(beta*gamma*gamma);return M;}
+function rfLinear6(VGeV=CFG.rfVoltageGeV,freq=effectiveRFFrequency(),phiS=CFG.synchronousPhase){const {beta}=rel(),k=2*Math.PI*freq/CFG.c,A=VGeV/(Math.max(beta*beta,1e-15)*CFG.referenceEnergyGeV);const M=identity6();M[5][4]=-A*k*Math.cos(phiS);return M;}
+
+function mkDrift(L,name='Drift'){return {type:'drift',L,name};}
+function mkQuad(L,k,name='Quadrupole'){return {type:'quad',L,k,name};}
+function mkBend(L,rho,name='Sector dipole'){return {type:'sbend',L,rho,name};}
+function mkRF(name='RF cavity'){return {type:'rf',L:0,VGeV:CFG.rfVoltageGeV,freq:effectiveRFFrequency(),phiS:CFG.synchronousPhase,name};}
+function mkKick(kick,name='Steering kick'){return {type:'kick',L:0,kick,name};}
+function mkSext(L,k,name='Sextupole'){return {type:'sext',L:Math.max(0,L),k};}
+function mkOct(L,k,name='Octupole'){return {type:'oct',L:Math.max(0,L),k};}
+function mkSolenoid(L,B,name='Solenoid'){
+  return {type:'solenoid',L:Math.max(0,L),Bz:Number(B)||0,name};
+}
+function registerFieldMap(name,map){
+  if(!map || typeof map.E!=='function' || typeof map.B!=='function') throw new Error('Field map requires E(x,y,z,t) and B(x,y,z,t) functions.');
+  CFG.fieldMaps.set(name,map); return map;
+}
+function fieldMapFor(m){return m && m.fieldMap ? CFG.fieldMaps.get(m.fieldMap) : null;}
+function multipoleFieldLocal(x,y,m,pRef){
+  const q=NL.qe;
+  let Bx=0,By=0;
+  if(m.type==='sbend'){
+    const B0=-pRef/(q*Math.max(Math.abs(m.rho),1e-12))*(Math.sign(m.rho)||1);
+    By+=B0;
+  }
+  if(m.type==='quad'){
+    const G=-m.k*pRef/q;
+    Bx+=G*y; By+=G*x;
+  }
+  if(m.type==='sext'){
+    const S=-m.k*pRef/q;
+    Bx+=S*x*y; By+=S*(x*x-y*y)/2;
+  }
+  if(m.type==='oct'){
+    const O=-m.k*pRef/q;
+    Bx+=O*(3*x*x*y-y*y*y)/6; By+=O*(x*x*x-3*x*y*y)/6;
+  }
+  return [Bx,By];
+}
+
+let phaseTargetDeg=60;
+let kQ=0.1;
+let machineKind='fodo';
+let elements=[];
+let micro=[];
+let optics=[];
+let dispersion=[];
+let pathCompactionIntegral=NaN;
+let frames=[];
+let particles=[];
+let initial=[];
+let importedInitial=null;
+let importedFileName='';
+let currentCell={};
+let totalS=0;
+let simError='';
+let referencePoses=[];
+let elementGeometry=[];
+let showAll3D=true;
+let worldBoundsCache=null;
+
+function baseFODOCell(k){
+  const Lb=CFG.dipoleLength,theta=CFG.fodoTheta,rho=Lb/theta;
+  return [
+    mkQuad(0.5,k,'QF half'),mkDrift(CFG.drifts[0]),mkBend(Lb,rho,'Sector dipole A'),mkDrift(CFG.drifts[1]),
+    mkQuad(1.0,-k,'QD'),mkDrift(CFG.drifts[2]),mkBend(Lb,rho,'Sector dipole B'),mkDrift(CFG.drifts[3]),
+    ...(Math.abs(CFG.sextupoleK2)>0?[mkSext(0,CFG.sextupoleK2,'Sextupole thin')]:[]),
+    ...(Math.abs(CFG.octupoleK3)>0?[mkOct(0,CFG.octupoleK3,'Octupole thin')]:[]),
+    mkQuad(0.5,k,'QF half')
+  ];
+}
+function ringCell(k){
+  const n=clamp(Math.round(CFG.ringCells),8,64),theta=2*Math.PI/(2*n),rho=CFG.dipoleLength/theta;
+  return [
+    mkQuad(0.5,k,'QF half'),mkDrift(1.0),mkBend(CFG.dipoleLength,rho,'Sector dipole A'),mkDrift(1.0),
+    mkQuad(1.0,-k,'QD'),mkDrift(1.0),mkBend(CFG.dipoleLength,rho,'Sector dipole B'),mkDrift(1.0),
+    ...(Math.abs(CFG.sextupoleK2)>0?[mkSext(0,CFG.sextupoleK2,'Sextupole thin')]:[]),
+    ...(Math.abs(CFG.octupoleK3)>0?[mkOct(0,CFG.octupoleK3,'Octupole thin')]:[]),
+    mkQuad(0.5,k,'QF half')
+  ];
+}
+function cellMatrix6(cell){let M=identity6();for(const e of cell){let E=elementMatrix6(e);M=mat6Mul(E,M);}return M;}
+function elementMatrix6(e){
+  if(e.type==='drift')return mat6Mul(slip6(e.L),makeDrift6(e.L));
+  if(e.type==='quad')return mat6Mul(slip6(e.L),quad6(e.L,e.k));
+  if(e.type==='sbend')return mat6Mul(slip6(e.L),sector6(e.L,e.rho));
+  if(e.type==='solenoid'){
+    const K=(NL.qe*e.Bz)/(2*Math.max(momentumSIFromEnergyGeV(CFG.referenceEnergyGeV),1e-30));
+    return solenoid6(e.L,K);
+  }
+  if(e.type==='rf')return rfLinear6();
+  if(e.type==='kick')return identity6();
+  return identity6();
+}
+function makeDrift6(L){const M=identity6();M[0][1]=L;M[2][3]=L;return M;}
+function quad6(L,k){const M=identity6(),x=quad2(L,k),y=quadY2(L,k);M[0][0]=x[0][0];M[0][1]=x[0][1];M[1][0]=x[1][0];M[1][1]=x[1][1];M[2][2]=y[0][0];M[2][3]=y[0][1];M[3][2]=y[1][0];M[3][3]=y[1][1];return M;}
+function matrix2From6(M){return [[M[0][0],M[0][1]],[M[1][0],M[1][1]]];}
+function phaseFrom2(M){const t=(M[0][0]+M[1][1])/2;if(t<=-1||t>=1)return null;return Math.acos(clamp(t,-1,1));}
+function solveKForPhase(targetDeg,kind){
+  const target=targetDeg*Math.PI/180,cellBuilder=kind==='ring'?ringCell:baseFODOCell;let prev=null,best={k:.1,err:Infinity,mu:null};
+  for(let i=0;i<=1400;i++){
+    const k=.001+i*(.70-.001)/1400,mu=phaseFrom2(matrix2From6(cellMatrix6(cellBuilder(k))));
+    if(mu!==null){const err=Math.abs(mu-target);if(err<best.err)best={k,err,mu};if(prev&&((prev.mu-target)*(mu-target)<=0)){let lo=prev.k,hi=k,mlo=prev.mu;for(let j=0;j<45;j++){const mid=.5*(lo+hi),mm=phaseFrom2(matrix2From6(cellMatrix6(cellBuilder(mid))));if(mm===null)break;if((mlo-target)*(mm-target)<=0)hi=mid;else{lo=mid;mlo=mm;}}const kr=.5*(lo+hi),mr=phaseFrom2(matrix2From6(cellMatrix6(cellBuilder(kr))));if(mr!==null)return {k:kr,err:Math.abs(mr-target),mu:mr};}prev={k,mu};}
+  }
+  return best.err<.01?best:null;
+}
+function solvePeriodicDispersion(M){
+  const A=[[1-M[0][0],-M[0][1]],[-M[1][0],1-M[1][1]]],b=[M[0][5],M[1][5]],det=A[0][0]*A[1][1]-A[0][1]*A[1][0];
+  if(Math.abs(det)<1e-14)return {eta:0,etap:0,matched:false};
+  return {eta:(b[0]*A[1][1]-A[0][1]*b[1])/det,etap:(A[0][0]*b[1]-b[0]*A[1][0])/det,matched:true};
+}
+function solveMatchedOptics(cell){
+  const M6=cellMatrix6(cell),Mx=matrix2From6(M6),My=[[M6[2][2],M6[2][3]],[M6[3][2],M6[3][3]]];
+  const tx=twissFromM(Mx),ty=twissFromM(My),disp=solvePeriodicDispersion(M6);return {M6,Mx,My,tx,ty,disp};
+}
+function chooseK(){
+  const mode=document.getElementById('opticsMode').value;
+  if(mode==='phase'){const solved=solveKForPhase(Number(phaseTargetDeg),machineKind);kQ=solved?solved.k:Math.min(0.65,Math.max(0.02,kQ));}
+  else{kQ=Number(document.getElementById('kSlider').value);}
+}
+function buildLattice(){
+  chooseK();
+  const cell=machineKind==='ring'?ringCell(kQ):baseFODOCell(kQ);currentCell=solveMatchedOptics(cell);
+  if(!currentCell.tx||!currentCell.ty){throw new Error('Requested quadrupole settings produce an unstable FODO cell; choose a lower phase advance or KQ.');}
+  elements=[];
+  if(machineKind==='fodo'){
+    const full=Math.floor(CFG.fodoCells),half=CFG.fodoCells-full;
+    for(let c=0;c<full;c++){elements.push(...cell.map(e=>({...e})));if(c===2)elements.push(mkRF());}
+    if(half>0){elements.push(mkQuad(0.5,kQ,'QF half'),mkDrift(0.5),mkBend(CFG.dipoleLength/2,(CFG.dipoleLength/CFG.fodoTheta),'Half-cell dipole A'),mkDrift(0.5),mkQuad(0.5,-kQ,'QD half'));}
+    if(Math.abs(CFG.orbitKickMr)>1e-12)elements.splice(1,0,mkKick(CFG.orbitKickMr*1e-3,'Steering kick'));
+  }else{
+    const n=clamp(Math.round(CFG.ringCells),8,64);for(let c=0;c<n;c++){elements.push(...cell.map(e=>({...e})));if(c===Math.floor(n/2))elements.push(mkRF());}
+    if(Math.abs(CFG.orbitKickMr)>1e-12)elements.splice(1,0,mkKick(CFG.orbitKickMr*1e-3,'Steering kick'));
+  }
+  if(Math.abs(CFG.solenoidFieldT)>1e-15 && CFG.solenoidLength>0){
+    const mid=Math.max(1,Math.floor(elements.length/2));
+    elements.splice(mid,0,mkSolenoid(CFG.solenoidLength,CFG.solenoidFieldT,'Solenoid'));
+  }
+  expandMachine();
+}
+function expandMachine(){
+  micro=[];totalS=0;
+  for(let ei=0;ei<elements.length;ei++){
+    const e=elements[ei];
+    if(e.L<=0){micro.push({...e,s:totalS,ds:0,elementIndex:ei,subIndex:0,nSub:1});continue;}
+    const n=Math.max(1,Math.min(100,Math.ceil(e.L/Math.max(CFG.integrationStep,2e-4))));const ds=e.L/n;
+    for(let j=0;j<n;j++)micro.push({...e,s:totalS,ds,elementIndex:ei,subIndex:j,nSub:n});
+    totalS+=e.L;
+  }
+}
+function buildInitial(){
+  resetSeed();const mt=currentCell.tx,my=currentCell.ty,dp=currentCell.disp;
+  if(!mt||!my)throw new Error('No stable transverse periodic solution.');
+  const out=[];
+  const betX=mt.beta,alX=mt.alpha,betY=my.beta,alY=my.alpha;
+  for(let i=0;i<CFG.N;i++){
+    const a=gaussianPair(),b=gaussianPair(),c=gaussianPair();
+    const sx=Math.sqrt(CFG.emitX),sy=Math.sqrt(CFG.emitY),sz=Math.sqrt(CFG.emitZ);
+    const ux=a[0]*sx*Math.sqrt(betX),px=(-alX*a[0]/Math.sqrt(betX)+a[1]/Math.sqrt(betX))*sx;
+    const uy=b[0]*sy*Math.sqrt(betY),py=(-alY*b[0]/Math.sqrt(betY)+b[1]/Math.sqrt(betY))*sy;
+    const zSigma=Math.sqrt(CFG.emitZ*CFG.betaZ), dSigma=Math.sqrt(CFG.emitZ/CFG.betaZ);
+    const z=c[0]*zSigma, d=c[1]*dSigma;
+    out.push({x:ux+dp.eta*d,xp:px+dp.etap*d,y:uy,yp:py,z,d});
+  }
+  return out;
+}
+function canonicalDrift(q,L){
+  if(!L)return;
+  const oneD=Math.max(1+q.d,1e-9),{beta,gamma}=rel();
+  q.x += L*q.xp/oneD; q.y += L*q.yp/oneD;
+  // Paraxial Hamiltonian longitudinal slip, including transverse path-lengthening.
+  q.z += L*(q.d/(beta*beta*gamma*gamma) - (q.xp*q.xp+q.yp*q.yp)/(2*oneD*oneD));
+}
+function canonicalQuadKick(q,L,k){
+  // Exact potential kick from V = k(x^2-y^2)/2 in normalized canonical momenta.
+  q.xp -= L*k*q.x; q.yp += L*k*q.y;
+}
+function symplecticQuad4(q,L,k){
+  // Fourth-order Yoshida composition of the symmetric drift-kick-drift map.
+  // Negative substeps are intentional; the composition is symplectic for this separable Hamiltonian.
+  const r=Math.cbrt(2),w1=1/(2-r),w0=-r/(2-r);
+  const s2=(h)=>{canonicalDrift(q,h/2);canonicalQuadKick(q,h,k);canonicalDrift(q,h/2);};
+  s2(w1*L);s2(w0*L);s2(w1*L);
+}
+function propagateOne(q,m){
+  if(m.type==='drift'){
+    canonicalDrift(q,m.ds);
+  }else if(m.type==='quad'){
+    symplecticQuad4(q,m.ds,m.k);
+  }else if(m.type==='sbend'){
+    // Exact first-order sector-bend canonical map; slip6 is a separate canonical drift map.
+    apply6(sector6(m.ds,m.rho),q);
+    const {beta,gamma}=rel();q.z += m.ds*q.d/(beta*beta*gamma*gamma);
+  }else if(m.type==='solenoid'){
+    const K=(NL.qe*m.Bz)/(2*Math.max(momentumSIFromEnergyGeV(CFG.referenceEnergyGeV),1e-30));
+    apply6(solenoid6(m.ds,K),q);const {beta,gamma}=rel();q.z+=m.ds*q.d/(beta*beta*gamma*gamma);
+  }else if(m.type==='rf'){
+    const {beta}=rel();const k=2*Math.PI*m.freq/CFG.c;const ph=m.phiS-k*q.z;
+    q.d += (m.VGeV/(Math.max(beta*beta,1e-15)*CFG.referenceEnergyGeV))*(Math.sin(ph)-Math.sin(m.phiS));
+  }else if(m.type==='kick'){
+    q.xp+=m.kick;
+  }else if(m.type==='sext'){
+    q.xp-=m.k*(q.x*q.x-q.y*q.y)/2; q.yp+=m.k*q.x*q.y;
+  }else if(m.type==='oct'){
+    q.xp-=m.k*(q.x**3-3*q.x*q.y*q.y)/6; q.yp+=m.k*(3*q.x*q.x*q.y-q.y**3)/6;
+  }
+  if(!Number.isFinite(q.x)||!Number.isFinite(q.xp)||!Number.isFinite(q.y)||!Number.isFinite(q.yp)||!Number.isFinite(q.z)||!Number.isFinite(q.d))throw new Error('Non-finite canonical phase-space state');
+  if(Math.max(Math.abs(q.x),Math.abs(q.y),Math.abs(q.z))>CFG.maxAbsState||Math.max(Math.abs(q.xp),Math.abs(q.yp),Math.abs(q.d))>CFG.maxAbsState)throw new Error('State exceeded numerical safety bound');
+}
+function advanceReferencePose(pose,m){
+  const q={...pose};
+  const L=Math.max(0,Number(m.ds)||0);
+  if(L<=0)return q;
+  if(m.type==='sbend'){
+    const rho=m.rho;
+    const theta=L/rho;
+    const psi0=q.psi;
+    const psi1=psi0+theta;
+    // Exact reference-orbit geometry for a sector bend in the horizontal plane.
+    q.X += rho*(Math.cos(psi0)-Math.cos(psi1));
+    q.Z += rho*(Math.sin(psi1)-Math.sin(psi0));
+    q.psi=psi1;
+  }else{
+    // Straight reference trajectory through drifts/quads; thin RF/kicks have L=0.
+    q.X += L*Math.sin(q.psi);
+    q.Z += L*Math.cos(q.psi);
+  }
+  return q;
+}
+function worldFromLocal(pose,q){
+  const x=q.x, y=q.y, z=q.z;
+  const cp=Math.cos(pose.psi), sp=Math.sin(pose.psi);
+  // Frenet frame: local x is horizontal normal, local y is vertical,
+  // local z is longitudinal displacement along the design trajectory.
+  return {
+    X:pose.X + z*sp + x*cp,
+    Y:y,
+    Z:pose.Z + z*cp - x*sp
+  };
+}
+function buildReferenceGeometry(){
+  referencePoses=[]; elementGeometry=[]; worldBoundsCache=null;
+  let pose={X:0,Y:0,Z:0,psi:0};
+  referencePoses.push({...pose});
+  for(let ei=0;ei<elements.length;ei++){
+    const e=elements[ei];
+    const geom={elementIndex:ei,type:e.type,name:e.name,L:e.L,start:{...pose},microSegments:[]};
+    for(const m of micro.filter(mm=>mm.elementIndex===ei)){
+      const start={...pose};
+      pose=advanceReferencePose(pose,m);
+      const end={...pose};
+      geom.microSegments.push({start,end,m});
+      referencePoses.push({...pose});
+    }
+    geom.end={...pose};
+    elementGeometry.push(geom);
+  }
+}
+function particleWorldAt(frameIndex,id){
+  const fr=frames[frameIndex],pose=referencePoses[frameIndex];
+  if(!fr||!pose||!fr.particles[id])return null;
+  return worldFromLocal(pose,fr.particles[id]);
+}
+
+function buildFrames(){
+  frames=[];simError='';initial=buildInitial();let state=initial.map(q=>({...q})),s=0;
+  frames.push({particles:state.map(q=>({...q})),s,element:'Start',elementIndex:-1,microIndex:-1,rf:null});
+  try{for(let i=0;i<micro.length;i++){const m=micro[i];for(const q of state)propagateOne(q,m);s+=m.ds;frames.push({particles:state.map(q=>({...q})),s,element:m.name||m.type,elementIndex:m.elementIndex,microIndex:i,rf:m.type==='rf'?{VGeV:m.VGeV,freq:m.freq,phiS:m.phiS}:null});}}catch(err){simError=String(err.message||err);}
+  buildReferenceGeometry();
+  particles=(frames[0]?.particles||[]).map(q=>({...q}));
+}
+
+function buildOpticsAlong(){
+  const out=[],dp=[];let sx=[[currentCell.tx.beta,-currentCell.tx.alpha],[-currentCell.tx.alpha,currentCell.tx.gamma]],sy=[[currentCell.ty.beta,-currentCell.ty.alpha],[-currentCell.ty.alpha,currentCell.ty.gamma]];let s=0,compInt=0;
+  out.push({s,bx:currentCell.tx.beta,ax:currentCell.tx.alpha,by:currentCell.ty.beta,ay:currentCell.ty.alpha});
+  let dVec=[currentCell.disp.eta,currentCell.disp.etap];
+  dp.push({s,eta:dVec[0],etap:dVec[1]});
+  for(const m of micro){let Mx,My;if(m.type==='drift'){Mx=drift2(m.ds);My=drift2(m.ds)}else if(m.type==='quad'){Mx=quad2(m.ds,m.k);My=quadY2(m.ds,m.k)}else if(m.type==='sbend'){Mx=sector2(m.ds,m.rho);My=drift2(m.ds)}else if(m.type==='solenoid'){const K=(NL.qe*m.Bz)/(2*Math.max(momentumSIFromEnergyGeV(CFG.referenceEnergyGeV),1e-30));const a=K*m.ds;Mx=[[Math.cos(a),Math.sin(a)/Math.max(Math.abs(K),1e-30)],[ -K*Math.sin(a),Math.cos(a) ]];My=Mx}else if(m.type==='rf'){Mx=[[1,0],[0,1]];My=Mx}else{Mx=[[1,0],[0,1]];My=drift2(0)}sx=covProp(sx,Mx);sy=covProp(sy,My);if(m.type==='sbend'){const th=m.ds/m.rho,c=Math.cos(th),sn=Math.sin(th);const etaIn=dVec[0],epIn=dVec[1];dVec=[c*etaIn+m.rho*sn*epIn+m.rho*(1-c),-sn/m.rho*etaIn+c*epIn+sn];compInt+=(0.5*(etaIn+dVec[0])/m.rho)*m.ds;}else if(m.type==='drift'||m.type==='quad'){dVec=[Mx[0][0]*dVec[0]+Mx[0][1]*dVec[1],Mx[1][0]*dVec[0]+Mx[1][1]*dVec[1]];}s+=m.ds;out.push({s,bx:sx[0][0],ax:-sx[0][1],by:sy[0][0],ay:-sy[0][1]});dp.push({s,eta:dVec[0],etap:dVec[1]});}
+  optics=out;dispersion=dp;pathCompactionIntegral=compInt;
+}
+function setBuildStatus(msg,warn=false){
+  const st=document.getElementById('status');st.className=warn?'status warn':'status';st.textContent=msg;
+}
+function buildAll(){
+  const token=++lastBuildToken; building=true; playing=false; simError=''; numericalMapCache=null; diagnosticBusy=false; diagnosticMessage='pending';
+  clearHeatCache();
+  try{
+    buildLattice(); buildOpticsAlong();
+    frames=[];trackingStates=[];radiationDiagnostics=[];nonlinearFrameDiagnostics=[];frame=0;selected=[];levels=new Map();history=new Map();
+    initial=importedInitial ? importedInitial.map(q=>({...q})) : buildInitial();
+    annotateReferenceSchedule();
+    buildReferenceGeometry();
+    // Canonical paraxial coordinates: (x, px, y, py, z, delta). The element
+    // tracker composes analytic linear maps with exact Hamiltonian thin kicks.
+    // Radiation/recoil are intentionally excluded: dissipative forces are not symplectic.
+    const state=initial.map(q=>({...q,xp:q.xp*(1+q.d),yp:q.yp*(1+q.d),alive:true,lossReason:'',energyGeV:CFG.referenceEnergyGeV*(1+q.d),energyOffsetGeV:CFG.referenceEnergyGeV*q.d}));
+    const decorate=(q,idx)=>{
+      const E=CFG.referenceEnergyGeV*(1+q.d),g=Math.max(E/CFG.meGeV,1),b=Math.sqrt(Math.max(1-1/(g*g),0));
+      return {...q,xp:q.xp/Math.max(1+q.d,1e-9),yp:q.yp/Math.max(1+q.d,1e-9),energyGeV:E,energyOffsetGeV:E-CFG.referenceEnergyGeV,beta:b,gamma:g,
+        pSI:momentumSIFromEnergyGeV(Math.max(E,CFG.meGeV)),phi:wrapPhase(CFG.synchronousPhase-2*Math.PI*effectiveRFFrequency()*q.z/CFG.c),
+        time:(referenceTimes[idx]||0)-q.z/Math.max(b*CFG.c,1e-30),dt:-q.z/Math.max(b*CFG.c,1e-30),radE:0,quantumPhotons:0};
+    };
+    frames.push({particles:state.map(q=>decorate(q,0)),s:0,element:'Start',elementIndex:-1,microIndex:-1,rf:null});
+    particles=frames[0].particles.map(q=>({...q}));render();
+    setBuildStatus('Building canonical symplectic element maps… 0%');
+    let i=0,sPos=0;const chunk=8;
+    function insideAperture(q){
+      const ax=Math.max(CFG.apertureX,1e-6),ay=Math.max(CFG.apertureY,1e-6);
+      if(CFG.apertureShape==='ellipse')return (q.x/ax)**2+(q.y/ay)**2<=1;
+      if(CFG.apertureShape==='rectangle')return Math.abs(q.x)<=ax&&Math.abs(q.y)<=ay;
+      return Math.hypot(q.x,q.y)<=ax;
+    }
+    function work(){
+      if(token!==lastBuildToken)return;
+      const stop=Math.min(i+chunk,micro.length);
+      try{
+        for(;i<stop;i++){
+          const m=micro[i];
+          for(const q of state){
+            if(q.alive===false)continue;
+            propagateOne(q,m);
+            if(!insideAperture(q)){q.alive=false;q.lossReason='aperture';}
+          }
+          sPos+=m.ds;
+          const qs=state.map(q=>decorate(q,i+1));
+          radiationDiagnostics.push(0);
+          nonlinearFrameDiagnostics.push({s:sPos,refE:referenceEnergies[i+1]||CFG.referenceEnergyGeV,refBeta:betaGammaFromP(referenceMomentum[i+1]||referenceMomentum[0]).beta});
+          frames.push({particles:qs,s:sPos,element:m.name||m.type,elementIndex:m.elementIndex,microIndex:i,rf:m.type==='rf'?{VGeV:m.VGeV,freq:m.freq,phiS:m.phiS,phase0:m.phase0}:null});
+        }
+      }catch(err){simError=String(err&&err.message||err);i=micro.length;}
+      if(i<micro.length){
+        setBuildStatus(`Building canonical symplectic element maps… ${Math.round(100*i/Math.max(micro.length,1))}%`);render();setTimeout(work,0);
+      }else{
+        particles=(frames[0]?.particles||[]).map(q=>({...q}));computeRanges();building=false;frame=0;render();
+        if(simError)setBuildStatus(`Tracking stopped safely: ${simError}`,true);
+        else {setBuildStatus((importedInitial?`Imported distribution (${importedInitial.length} particles) tracked through the lattice. `:'')+'Symplectic element-map tracking complete. Radiation/recoil are off in Hamiltonian mode; validate maps before quantitative use.');setTimeout(buildNumericalMap,30);}
+      }
+    }
+    setTimeout(work,0);
+  }catch(err){building=false;simError=String(err&&err.message||err);frames=[{particles:[],s:0,element:'Error',elementIndex:-1,microIndex:-1,rf:null}];render();setBuildStatus(`Build error: ${simError}`,true);}
+}
+function sampleStats(kind){
+  const live=particles.filter(q=>q.alive!==false);
+  const vals=live.map(q=>kind==='xx'?[q.x*1000,q.xp*1000]:kind==='yy'?[q.y*1000,q.yp*1000]:kind==='xy'?[q.x*1000,q.y*1000]:[q.z*1000,q.d]);
+  const n=vals.length;if(!n)return {mean:[0,0],cov:[[1,0],[0,1]]};
+  let mx=0,my=0;for(const v of vals){mx+=v[0];my+=v[1];}mx/=n;my/=n;let c00=0,c01=0,c11=0;
+  for(const v of vals){const a=v[0]-mx,b=v[1]-my;c00+=a*a;c01+=a*b;c11+=b*b;}const den=Math.max(n-1,1);
+  return {mean:[mx,my],cov:[[c00/den,c01/den],[c01/den,c11/den]]};
+}
+function eig2(C){const a=C[0][0],b=C[0][1],d=C[1][1],tr=a+d,disc=Math.sqrt(Math.max((a-d)*(a-d)+4*b*b,0)),l1=Math.max((tr+disc)/2,0),l2=Math.max((tr-disc)/2,0),ang=0.5*Math.atan2(2*b,a-d);return {l1,l2,ang};}
+function drawEllipse(ctx,kind,rX,rY,w,h,pad){const st=sampleStats(kind),e=eig2(st.cov);ctx.save();for(const k of [1,2,3]){ctx.strokeStyle=k===3?'rgba(98,214,255,.95)':'rgba(98,214,255,.50)';ctx.lineWidth=k===3?1.8:1.1;ctx.setLineDash(k===3?[]:[5,4]);ctx.beginPath();for(let i=0;i<=100;i++){const t=2*Math.PI*i/100,ca=Math.cos(t),sa=Math.sin(t),xx=st.mean[0]+k*Math.sqrt(e.l1)*ca*Math.cos(e.ang)-k*Math.sqrt(e.l2)*sa*Math.sin(e.ang),yy=st.mean[1]+k*Math.sqrt(e.l1)*ca*Math.sin(e.ang)+k*Math.sqrt(e.l2)*sa*Math.cos(e.ang),px=sx(xx,rX,w,pad),py=sy(yy,rY,h,pad);if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);}ctx.stroke();}ctx.setLineDash([]);ctx.restore();}
+function heatColor(t){const stops=[[0,[8,10,18]],[.16,[31,10,53]],[.34,[91,15,70]],[.52,[165,35,56]],[.72,[232,98,31]],[1,[255,238,132]]];t=clamp(t,0,1);for(let i=1;i<stops.length;i++){if(t<=stops[i][0]){const A=stops[i-1],B=stops[i],u=(t-A[0])/(B[0]-A[0]);return `rgb(${Math.round(A[1][0]+u*(B[1][0]-A[1][0]))},${Math.round(A[1][1]+u*(B[1][1]-A[1][1]))},${Math.round(A[1][2]+u*(B[1][2]-A[1][2]))})`;}}return 'rgb(255,238,132)';}
+function kdeGrid(vx,vy,rX,rY,bx,by,gx=32,gy=24,kind=''){
+  const key=heatKey('kde'+kind,rX,rY,bx,by)+':'+gx+'x'+gy;
+  const cached=heatCache.get(key);
+  if(cached) return cached;
+  const d=Array.from({length:gy},()=>Array(gx).fill(0));let max=0;
+  const safe=[];for(let j=0;j<vx.length;j++){const x=Number(vx[j]),y=Number(vy[j]);if(Number.isFinite(x)&&Number.isFinite(y))safe.push([x,y])}
+  for(let iy=0;iy<gy;iy++){
+    const yy=rY[0]+(iy+.5)/gy*(rY[1]-rY[0]);
+    for(let ix=0;ix<gx;ix++){
+      const xx=rX[0]+(ix+.5)/gx*(rX[1]-rX[0]);let sum=0;
+      for(const [x,y] of safe){const dx=(xx-x)/bx,dy=(yy-y)/by;const u=.5*(dx*dx+dy*dy);sum+=Math.exp(-Math.min(u,80))}
+      d[iy][ix]=sum; if(sum>max)max=sum;
+    }
+  }
+  const out={d,max};heatCache.set(key,out);
+  while(heatCache.size>48){const first=heatCache.keys().next().value;heatCache.delete(first)}
+  return out;
+}
+function sx(v,r,w,pad){return pad+(v-r[0])/(r[1]-r[0])*(w-2*pad)}
+function sy(v,r,h,pad){return h-pad-(v-r[0])/(r[1]-r[0])*(h-2*pad)}
+function invx(px,r,w,pad){return r[0]+(px-pad)/(w-2*pad)*(r[1]-r[0])}
+function invy(py,r,h,pad){return r[0]+(h-pad-py)/(h-2*pad)*(r[1]-r[0])}
+function zoomRange(r,c,f,b){const span=r[1]-r[0],ns=Math.min(b[1]-b[0],Math.max((b[1]-b[0])*0.02,span*f)),u=(c-r[0])/span;let a=c-u*ns,b2=a+ns;if(a<b[0]){a=b[0];b2=a+ns}if(b2>b[1]){b2=b[1];a=b2-ns}return [a,b2]}
+function addZoom(canvas,kind){canvas.addEventListener('wheel',ev=>{ev.preventDefault();const rect=canvas.getBoundingClientRect(),px=(ev.clientX-rect.left)*canvas.width/rect.width,py=(ev.clientY-rect.top)*canvas.height/rect.height,pad=44,r=ZOOM[kind],cx=invx(px,r.x,canvas.width,pad),cy=invy(py,r.y,canvas.height,pad),fac=ev.deltaY<0?.82:1.22;r.x=zoomRange(r.x,cx,fac,FULL[kind].x);r.y=zoomRange(r.y,cy,fac,FULL[kind].y);render()},{passive:false});canvas.addEventListener('dblclick',()=>{ZOOM[kind]={x:[...FULL[kind].x],y:[...FULL[kind].y]};render()});}
+function drawAxes(ctx,w,h,rX,rY,xlab,ylab){const p=44;ctx.strokeStyle='#394556';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(p,h-p);ctx.lineTo(w-p,h-p);ctx.lineTo(w-p,p);ctx.stroke();ctx.fillStyle='#9da8b9';ctx.font='11px system-ui';ctx.textAlign='center';ctx.fillText(xlab,w/2,h-10);ctx.save();ctx.translate(12,h/2);ctx.rotate(-Math.PI/2);ctx.fillText(ylab,0,0);ctx.restore();ctx.textAlign='left';ctx.fillText(rX[0].toFixed(2),p,h-p+15);ctx.textAlign='right';ctx.fillText(rX[1].toFixed(2),w-p,h-p+15);ctx.textAlign='center';ctx.fillText(rY[0].toFixed(3),p-10,h-p);ctx.fillText(rY[1].toFixed(3),p-10,p+4);}
+function drawHeatLegend(ctx,w){const x=w-178,y=15,ww=115,hh=8;for(let i=0;i<ww;i++){ctx.fillStyle=heatColor(i/(ww-1));ctx.fillRect(x+i,y,1,hh)}ctx.fillStyle='#9da8b9';ctx.font='8px system-ui';ctx.textAlign='left';ctx.fillText('low',x,y+17);ctx.textAlign='right';ctx.fillText('high',x+ww,y+17);ctx.textAlign='left';}
+function drawPhaseBase(canvas,kind){const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height,p=44;ctx.fillStyle='#0b1018';ctx.fillRect(0,0,w,h);let rX=ZOOM[kind].x,rY=ZOOM[kind].y,vx,vy,bx,by,xlab,ylab;if(kind==='xx'){vx=particles.map(q=>q.alive===false?NaN:q.x*1000);vy=particles.map(q=>q.alive===false?NaN:q.xp*1000);bx=bwX(kind);by=bwY(kind);xlab='x [mm]';ylab='x′ [mrad]'}else if(kind==='yy'){vx=particles.map(q=>q.alive===false?NaN:q.y*1000);vy=particles.map(q=>q.alive===false?NaN:q.yp*1000);bx=bwX(kind);by=bwY(kind);xlab='y [mm]';ylab='y′ [mrad]'}else if(kind==='xy'){vx=particles.map(q=>q.alive===false?NaN:q.x*1000);vy=particles.map(q=>q.alive===false?NaN:q.y*1000);bx=bwX(kind);by=bwY(kind);xlab='x [mm]';ylab='y [mm]'}else{vx=particles.map(q=>q.alive===false?NaN:q.z*1000);vy=particles.map(q=>q.alive===false?NaN:q.d);bx=bwX(kind);by=bwY(kind);xlab='z [mm]';ylab='δ = Δp/p₀'}const kg=kdeGrid(vx,vy,rX,rY,bx,by,32,24,kind);if(kg.max>0)for(let iy=0;iy<kg.d.length;iy++)for(let ix=0;ix<kg.d[iy].length;ix++){const x0=p+ix/kg.d[iy].length*(w-2*p),x1=p+(ix+1)/kg.d[iy].length*(w-2*p),y1=h-p-iy/kg.d.length*(h-2*p),y0=h-p-(iy+1)/kg.d.length*(h-2*p);ctx.fillStyle=heatColor(kg.d[iy][ix]/kg.max);ctx.fillRect(x0,y0,x1-x0+1,y1-y0+1);}drawAxes(ctx,w,h,rX,rY,xlab,ylab);drawHeatLegend(ctx,w);ctx.save();ctx.beginPath();ctx.rect(p,p,w-2*p,h-2*p);ctx.clip();for(const [si,id] of selected.entries()){const hist=history.get(id)||[];if(hist.length>1){ctx.save();ctx.strokeStyle=COLORS[si];ctx.globalAlpha=.55;ctx.lineWidth=1.5;ctx.beginPath();hist.forEach((v,j)=>{let hx,hy;if(kind==='xx'){hx=v.x*1000;hy=v.xp*1000}else if(kind==='yy'){hx=v.y*1000;hy=v.yp*1000}else if(kind==='xy'){hx=v.x*1000;hy=v.y*1000}else{hx=v.z*1000;hy=v.d}const px=sx(hx,rX,w,p),py=sy(hy,rY,h,p);j?ctx.lineTo(px,py):ctx.moveTo(px,py)});ctx.stroke();ctx.restore()}}const zx=sx(0,rX,w,p),zy=sy(0,rY,h,p);ctx.strokeStyle='rgba(220,230,245,.22)';ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(zx,p);ctx.lineTo(zx,h-p);ctx.stroke();ctx.beginPath();ctx.moveTo(p,zy);ctx.lineTo(w-p,zy);ctx.stroke();ctx.setLineDash([]);if(kind==='xx'||kind==='yy')drawEllipse(ctx,kind,rX,rY,w,h,p);for(let i=0;i<particles.length;i++){if(particles[i].alive===false)continue;const xx=sx(vx[i],rX,w,p),yy=sy(vy[i],rY,h,p),si=selected.indexOf(i);ctx.beginPath();ctx.arc(xx,yy,si>=0?6.2:2.5,0,2*Math.PI);ctx.fillStyle=si>=0?COLORS[si]:'rgba(255,255,255,.88)';ctx.fill();if(si>=0){ctx.beginPath();ctx.arc(xx,yy,2.5,0,2*Math.PI);ctx.fillStyle='#0b1018';ctx.fill();}}ctx.restore();ctx.fillStyle='rgba(0,0,0,.60)';ctx.fillRect(p+4,p+4,170,19);ctx.fillStyle='#d5deea';ctx.font='10px system-ui';ctx.textAlign='left';ctx.fillText(`s = ${finite(frames[frame]?.s,0).toFixed(3)} m`,p+9,p+17);}
+function drawPhase(canvas,kind){
+  drawPhaseBase(canvas,kind);
+  const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height,p=44;ctx.save();ctx.font='9px system-ui';ctx.textAlign='left';
+    if(kind==='xx'||kind==='yy'){
+    const st=sampleStats(kind),C=st.cov,det=C[0][0]*C[1][1]-C[0][1]*C[0][1];
+    if(det>0&&particles.length){
+      const eps=Math.sqrt(det),be=C[0][0]/eps,al=-C[0][1]/eps,c=[0,0,0];
+      for(const q of particles){const u=(kind==='xx'?q.x:q.y)*1000-st.mean[0],v=(kind==='xx'?q.xp:q.yp)*1000-st.mean[1],d2=(C[1][1]*u*u-2*C[0][1]*u*v+C[0][0]*v*v)/det;for(let k=0;k<3;k++)if(d2<=(k+1)*(k+1))c[k]++;}
+      const n=particles.length,l1='rms ellipses 1σ / 2σ / 3σ: '+(100*c[0]/n).toFixed(1)+'% / '+(100*c[1]/n).toFixed(1)+'% / '+(100*c[2]/n).toFixed(1)+'%',l2='ε'+(kind==='xx'?'x':'y')+',rms = '+eps.toFixed(4)+' mm·mrad · β = '+be.toFixed(2)+' m · α = '+al.toFixed(3);
+      const bw=Math.max(ctx.measureText(l1).width,ctx.measureText(l2).width)+12,bx=w-p-bw-4,by=h-p-32;
+      ctx.fillStyle='rgba(6,9,14,.85)';ctx.fillRect(bx,by,bw,28);ctx.fillStyle='#cfd8e6';ctx.fillText(l1,bx+6,by+11);ctx.fillText(l2,bx+6,by+23);
+    }
+  }
+  ctx.restore();
+}
+
+// ---- plot ranges sized to the whole run so particles never leave their boxes ----
+function niceMax(v){if(!(v>0)||!Number.isFinite(v))return 1;const e=Math.pow(10,Math.floor(Math.log10(v))),m=v/e;const nm=m<=1?1:m<=1.5?1.5:m<=2?2:m<=3?3:m<=4?4:m<=5?5:m<=7.5?7.5:10;return nm*e;}
+function computeRanges(){
+  // Compute the plotting envelope ONCE from the complete precomputed trajectory.
+  // The animation never modifies ZOOM, so the view does not zoom/pump as particles move.
+  let mx=0,mxp=0,my=0,myp=0,mz=0,md=0;
+  for(const fr of frames)for(const q of fr.particles){
+    if(q.alive===false)continue;
+    if(Number.isFinite(q.x)) mx=Math.max(mx,Math.abs(q.x));
+    if(Number.isFinite(q.xp)) mxp=Math.max(mxp,Math.abs(q.xp));
+    if(Number.isFinite(q.y)) my=Math.max(my,Math.abs(q.y));
+    if(Number.isFinite(q.yp)) myp=Math.max(myp,Math.abs(q.yp));
+    if(Number.isFinite(q.z)) mz=Math.max(mz,Math.abs(q.z));
+    if(Number.isFinite(q.d)) md=Math.max(md,Math.abs(q.d));
+  }
+  const PAD=1.25;
+  const X=Math.max(13,niceMax(mx*1e3*PAD));
+  const XP=Math.max(0.70,niceMax(mxp*1e3*PAD));
+  const Y=Math.max(13,niceMax(my*1e3*PAD));
+  const YP=Math.max(0.70,niceMax(myp*1e3*PAD));
+  const XY=Math.max(13,X,Y);
+  const Z=Math.max(20,niceMax(mz*1e3*PAD));
+  const D=Math.max(0.008,niceMax(md*PAD));
+  FULL.xx={x:[-X,X],y:[-XP,XP]};
+  FULL.yy={x:[-Y,Y],y:[-YP,YP]};
+  FULL.xy={x:[-XY,XY],y:[-XY,XY]};
+  FULL.zd={x:[-Z,Z],y:[-D,D]};
+  for(const k of Object.keys(FULL))ZOOM[k]={x:[...FULL[k].x],y:[...FULL[k].y]};
+  latZoom=1;
+}
+const BWDIV={xx:[47,40],yy:[47,40],xy:[37,37],zd:[50,32]};
+function bwX(kind){const r=FULL[kind].x;return (r[1]-r[0])/BWDIV[kind][0];}
+function bwY(kind){const r=FULL[kind].y;return (r[1]-r[0])/BWDIV[kind][1];}
+
+// ---- 3D beamline · longitudinal s with lateral x,y motion ----
+let latZoom=1;
+function latGeom(w,h){
+  const S=Math.max(totalS,1),A=Math.max(FULL.xy.x[1],1e-9)*1e-3,Lpx=0.26*h*latZoom,kl=Lpx/A;
+  const eS=[0.92,0.26],ex=[0.90,-0.35];
+  const usableW=w-140,usableH=h*0.56;
+  const ks=Math.max(1,Math.min(usableW/(eS[0]*S),usableH/(eS[1]*S)));
+  return {ks,kl,eS,ex,ox:w/2-0.5*eS[0]*S*ks,oy:h/2-0.5*eS[1]*S*ks};
+}
+function projLat(g,s,x,y){return {x:g.ox+s*g.ks*g.eS[0]+x*g.kl*g.ex[0],y:g.oy+s*g.ks*g.eS[1]+x*g.kl*g.ex[1]-y*g.kl};}
+function draw3DLat(){
+  const c=document.getElementById('c3s'),ctx=c.getContext('2d'),w=c.width,h=c.height;
+  ctx.fillStyle='#0b1018';ctx.fillRect(0,0,w,h);ctx.textAlign='left';
+  if(!frames.length||!elements.length){ctx.fillStyle='#aeb9c9';ctx.font='12px system-ui';ctx.fillText('No beamline available.',18,24);return;}
+  const g=latGeom(w,h),P=(s,x,y)=>projLat(g,s,x,y);
+  // design axis
+  let a=P(0,0,0),b=P(totalS,0,0);ctx.strokeStyle='rgba(210,220,235,.38)';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+  // magnets along s
+  let s0=0;
+  for(const e of elements){
+    const s1=s0+e.L;
+    if(e.type==='rf'){const p=P(s0,0,0);ctx.fillStyle='#ffd166';ctx.fillRect(p.x-4,p.y-14,8,28);}
+    else if(e.type==='kick'){const p=P(s0,0,0);ctx.fillStyle='#d9a0ff';ctx.fillRect(p.x-2,p.y-9,4,18);}
+    else if(e.type==='quad'||e.type==='sbend'){
+      const p0=P(s0,0,0),p1=P(s1,0,0);
+      ctx.strokeStyle=e.type==='sbend'?'rgba(112,225,161,.86)':(e.k>0?'rgba(70,160,255,.92)':'rgba(255,100,90,.92)');
+      ctx.lineWidth=e.type==='sbend'?8:7;ctx.lineCap='butt';ctx.beginPath();ctx.moveTo(p0.x,p0.y);ctx.lineTo(p1.x,p1.y);ctx.stroke();
+    }
+    s0=s1;
+  }
+  // faint paths of every particle up to the current step
+  if(showAll3D&&frames.length>1){
+    const stride=Math.max(1,Math.floor(frames.length/240));
+    ctx.lineWidth=0.7;ctx.globalAlpha=.16;ctx.strokeStyle='#dce7f5';
+    for(let id=0;id<CFG.N;id++){
+      ctx.beginPath();let started=false;
+      for(let fi=0;fi<=frame;fi+=stride){const fr=frames[fi],q=fr&&fr.particles[id];if(!q)continue;if(q.alive===false)break;const pp=P(fr.s,q.x,q.y);if(!started){ctx.moveTo(pp.x,pp.y);started=true}else ctx.lineTo(pp.x,pp.y);}
+      if(frame%stride!==0){const fr=frames[frame],q=fr&&fr.particles[id];if(q&&started){const pp=P(fr.s,q.x,q.y);ctx.lineTo(pp.x,pp.y);}}
+      if(started)ctx.stroke();
+    }
+    ctx.globalAlpha=1;
+  }
+  // selected trails
+  for(const [si,id] of selected.entries()){
+    const hst=history.get(id)||[];if(hst.length<2)continue;
+    ctx.strokeStyle=COLORS[si];ctx.globalAlpha=.85;ctx.lineWidth=2.2;ctx.beginPath();
+    hst.forEach((v,j)=>{const pp=P(v.s,v.x,v.y);j?ctx.lineTo(pp.x,pp.y):ctx.moveTo(pp.x,pp.y)});ctx.stroke();ctx.globalAlpha=1;
+  }
+  // current particle positions at the current s
+  const fr=frames[frame];
+  if(fr){
+    for(let i=0;i<particles.length;i++){
+      const q=particles[i];if(q.alive===false)continue;const pp=P(fr.s,q.x,q.y),si=selected.indexOf(i);
+      ctx.beginPath();ctx.arc(pp.x,pp.y,si>=0?6.5:2.7,0,2*Math.PI);ctx.fillStyle=si>=0?COLORS[si]:'rgba(255,255,255,.82)';ctx.fill();
+      if(si>=0){ctx.beginPath();ctx.arc(pp.x,pp.y,2.3,0,2*Math.PI);ctx.fillStyle='#0b1018';ctx.fill();}
+    }
+  }
+  ctx.fillStyle='#aeb9c9';ctx.font='11px system-ui';ctx.textAlign='left';ctx.fillText('click a visible particle to select',12,18);ctx.fillText('lateral x,y motion drawn exaggerated · wheel = change exaggeration · double-click = reset',12,34);
+  ctx.textAlign='right';ctx.fillText('s →',w-16,h-14);ctx.textAlign='left';
+}
+function selectLat(ev){
+  ev.preventDefault();const c=document.getElementById('c3s'),r=c.getBoundingClientRect(),mx=(ev.clientX-r.left)*c.width/r.width,my=(ev.clientY-r.top)*c.height/r.height,g=latGeom(c.width,c.height),fr=frames[frame];if(!fr)return;
+  let best=-1,bd=30*30;for(let i=0;i<particles.length;i++){if(particles[i].alive===false)continue;const pp=projLat(g,fr.s,particles[i].x,particles[i].y),d=(pp.x-mx)**2+(pp.y-my)**2;if(d<bd){bd=d;best=i}}
+  if(best>=0){playing=false;document.getElementById('play').textContent='Play';toggleSelect(best)}
+}
+function updateLatPick(){
+  const svg=document.getElementById('pick_c3s');if(!svg)return;while(svg.firstChild)svg.removeChild(svg.firstChild);
+  const w=svg.viewBox.baseVal.width,h=svg.viewBox.baseVal.height,g=latGeom(w,h),fr=frames[frame];if(!fr)return;
+  for(let i=0;i<particles.length;i++){if(particles[i].alive===false)continue;const pp=projLat(g,fr.s,particles[i].x,particles[i].y);if(pp.x<-20||pp.x>w+20||pp.y<-20||pp.y>h+20)continue;addPickCircle(svg,i,pp.x,pp.y,14)}
+}
+
+function drawRF(){const c=document.getElementById('crf'),ctx=c.getContext('2d'),w=c.width,h=c.height,p=44;ctx.fillStyle='#0b1018';ctx.fillRect(0,0,w,h);drawAxes(ctx,w,h,ZOOM.rf.x,ZOOM.rf.y,'RF phase [rad]','normalized E');ctx.strokeStyle='#62d6ff';ctx.lineWidth=1.8;ctx.beginPath();for(let i=0;i<=300;i++){const ph=-Math.PI+2*Math.PI*i/300,x=sx(ph,ZOOM.rf.x,w,p),y=sy(.5+.5*Math.sin(ph),ZOOM.rf.y,h,p);i?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.stroke();for(let i=0;i<particles.length;i++){const q=particles[i],ph=Number.isFinite(q.phi)?q.phi:CFG.synchronousPhase,en=clamp(.5+.5*q.d/.005,0,1),si=selected.indexOf(i);ctx.beginPath();ctx.arc(sx(ph,ZOOM.rf.x,w,p),sy(en,ZOOM.rf.y,h,p),si>=0?5.5:2.3,0,2*Math.PI);ctx.fillStyle=si>=0?COLORS[si]:'rgba(255,255,255,.72)';ctx.fill();}}
+function wrapPhase(x){return ((x+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI;}
+function worldBounds3D(){
+  if(worldBoundsCache)return worldBoundsCache;
+  let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity,minZ=Infinity,maxZ=-Infinity;
+  for(const p of referencePoses){minX=Math.min(minX,p.X);maxX=Math.max(maxX,p.X);minY=Math.min(minY,p.Y);maxY=Math.max(maxY,p.Y);minZ=Math.min(minZ,p.Z);maxZ=Math.max(maxZ,p.Z);}
+  if(!Number.isFinite(minX))return worldBoundsCache={minX:-1,maxX:1,minY:-1,maxY:1,minZ:-1,maxZ:1};
+  const pad=0.15*Math.max(maxX-minX,maxZ-minZ,1);
+  return worldBoundsCache={minX:minX-pad,maxX:maxX+pad,minY:minY-pad,maxY:maxY+pad,minZ:minZ-pad,maxZ:maxZ+pad};
+}
+function project3DWorld(P,w,h){
+  const b=worldBounds3D();
+  const cx=.5*(b.minX+b.maxX),cz=.5*(b.minZ+b.maxZ),cy=.5*(b.minY+b.maxY);
+  const sx=.90, sz=.90, vx=(P.X-cx)*sx, vz=(P.Z-cz)*sz, vy=(P.Y-cy)*2.4;
+  // Oblique/isometric-style projection: the design orbit remains visible when it bends.
+  const yaw=-0.58, pitch=0.34, cyaw=Math.cos(yaw),syaw=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
+  const U=cyaw*vz-syaw*vx;
+  const V=syaw*vz+cyaw*vx;
+  const screenX=U;
+  const screenY=cp*V-sp*vy;
+  const xScale=(w-90)/Math.max(b.maxZ-b.minZ,b.maxX-b.minX,1);
+  const yScale=(h-70)/Math.max(Math.abs(b.maxZ-b.minZ)+Math.abs(b.maxX-b.minX),2);
+  return {x:w*.5+screenX*xScale*1.25,y:h*.5-screenY*yScale*1.10};
+}
+function project3D(s,x,y,w,h){
+  const fi=Math.max(0,Math.min(frames.length-1,Math.round((totalS>0?s/totalS:0)*(frames.length-1))));
+  const pose=referencePoses[fi]||{X:0,Y:0,Z:s,psi:0};
+  return project3DWorld(worldFromLocal(pose,{x,y,z:0}),w,h);
+}
+function drawReferenceSegment(ctx,a,b,w,lw,style){
+  const pa=project3DWorld(a,w,ctx.canvas.height),pb=project3DWorld(b,w,ctx.canvas.height);
+  ctx.strokeStyle=style;ctx.lineWidth=lw;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(pa.x,pa.y);ctx.lineTo(pb.x,pb.y);ctx.stroke();
+}
+function drawMagnetLabel(ctx,pos,text,color,w,h){
+  const p=project3DWorld(pos,w,h);ctx.fillStyle=color;ctx.font='10px system-ui';ctx.textAlign='center';ctx.fillText(text,p.x,p.y-9);
+}
+function draw3D(){
+  const c=document.getElementById('c3d'),ctx=c.getContext('2d'),w=c.width,h=c.height;
+  ctx.fillStyle='#0b1018';ctx.fillRect(0,0,w,h);
+  if(!referencePoses.length){ctx.fillStyle='#aeb9c9';ctx.font='12px system-ui';ctx.fillText('No beamline geometry available.',18,24);return;}
+
+  // Design trajectory: exact straight/sector-bend reference geometry.
+  ctx.strokeStyle='rgba(210,220,235,.28)';ctx.lineWidth=1.2;ctx.setLineDash([5,5]);ctx.beginPath();
+  for(let i=0;i<referencePoses.length;i++){const p=project3DWorld(referencePoses[i],w,h);i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y);}ctx.stroke();ctx.setLineDash([]);
+
+  // Magnets follow the same reference trajectory rather than an artificial straight s-axis.
+  for(const g of elementGeometry){
+    if(g.type==='rf'){
+      const p=project3DWorld(g.start,w,h);ctx.fillStyle='#ffd166';ctx.fillRect(p.x-5,p.y-14,10,28);drawMagnetLabel(ctx,g.start,'RF','#ffd166',w,h);continue;
+    }
+    if(g.type==='kick'){
+      const p=project3DWorld(g.start,w,h);ctx.fillStyle='#d9a0ff';ctx.fillRect(p.x-3,p.y-10,6,20);continue;
+    }
+    let color='rgba(160,170,185,.35)',lw=3,label='';
+    if(g.type==='quad'){color=g.start&&elements[g.elementIndex]?.k>0?'rgba(70,160,255,.82)':'rgba(255,100,90,.82)';lw=8;label=elements[g.elementIndex].k>0?'QF · xF/yD':'QD · xD/yF';}
+    else if(g.type==='sbend'){color='rgba(112,225,161,.86)';lw=10;label='DIPOLE';}
+    const segs=g.microSegments;
+    for(const seg of segs){drawReferenceSegment(ctx,seg.start,seg.end,w,lw,color);}
+    if(label)drawMagnetLabel(ctx,g.start,label,color,w,h);
+  }
+
+  // All particle trajectories, not just the selected particles.
+  if(showAll3D && frames.length>1){
+    const stride=Math.max(1,Math.floor(frames.length/240));
+    ctx.lineWidth=0.75;ctx.globalAlpha=.17;ctx.strokeStyle='#dce7f5';
+    for(let id=0;id<CFG.N;id++){
+      ctx.beginPath();let started=false;
+      for(let fi=0;fi<=frame;fi+=stride){
+        const P=particleWorldAt(fi,id);if(!P)continue;const pp=project3DWorld(P,w,h);if(!started){ctx.moveTo(pp.x,pp.y);started=true}else ctx.lineTo(pp.x,pp.y);
+      }
+      const lastFi=Math.max(0,frame);if(lastFi%stride!==0){const P=particleWorldAt(lastFi,id);if(P){const pp=project3DWorld(P,w,h);if(started)ctx.lineTo(pp.x,pp.y);}}
+      if(started)ctx.stroke();
+    }
+    ctx.globalAlpha=1;
+  }
+
+  // Selected trajectories are emphasized over the ensemble.
+  for(const [si,id] of selected.entries()){
+    const hst=history.get(id)||[];ctx.strokeStyle=COLORS[si];ctx.globalAlpha=.80;ctx.lineWidth=2.4;ctx.beginPath();let first=true;
+    for(const v of hst){const P={X:v.X,Y:v.Y,Z:v.Z},pp=project3DWorld(P,w,h);if(first){ctx.moveTo(pp.x,pp.y);first=false}else ctx.lineTo(pp.x,pp.y);}ctx.stroke();ctx.globalAlpha=1;
+  }
+
+  // Current particle positions for all particles.
+  for(let i=0;i<particles.length;i++){
+    if(particles[i].alive===false)continue;const P=particleWorldAt(frame,i);if(!P)continue;const pp=project3DWorld(P,w,h),si=selected.indexOf(i);
+    ctx.beginPath();ctx.arc(pp.x,pp.y,si>=0?6.5:2.7,0,2*Math.PI);ctx.fillStyle=si>=0?COLORS[si]:'rgba(255,255,255,.78)';ctx.fill();
+    if(si>=0){ctx.beginPath();ctx.arc(pp.x,pp.y,2.3,0,2*Math.PI);ctx.fillStyle='#0b1018';ctx.fill();}
+  }
+  ctx.fillStyle='#aeb9c9';ctx.font='11px system-ui';ctx.textAlign='left';ctx.fillText('click a visible particle to select',12,18);ctx.fillText('QF blue · QD red · dipole green · RF gold',12,34);ctx.textAlign='right';ctx.fillText('s →',w-16,h-14);
+}
+function drawTransport(){const c=document.getElementById('transport'),ctx=c.getContext('2d'),w=c.width,h=c.height,pL=52,pR=30,pT=24,pB=34;ctx.fillStyle='#0b1018';ctx.fillRect(0,0,w,h);ctx.textAlign='left';let maxB=1;for(const o of optics)maxB=Math.max(maxB,o.bx,o.by);maxB*=1.12;const X=s=>pL+(s/Math.max(totalS,1))*(w-pL-pR),Y=v=>pT+(maxB-v)/maxB*(h-pT-pB);let s0=0;for(const e of elements){const xa=X(s0),xb=X(s0+e.L);ctx.fillStyle=e.type==='quad'?(e.k>0?'rgba(70,160,255,.22)':'rgba(255,100,90,.22)'):e.type==='sbend'?'rgba(112,225,161,.20)':e.type==='rf'?'rgba(255,209,102,.30)':e.type==='kick'?'rgba(218,160,255,.35)':'rgba(120,130,145,.08)';ctx.fillRect(xa,pT,Math.max(2,xb-xa),h-pT-pB);s0+=e.L;}ctx.strokeStyle='#293547';for(let i=0;i<=4;i++){const yy=pT+i/4*(h-pT-pB);ctx.beginPath();ctx.moveTo(pL,yy);ctx.lineTo(w-pR,yy);ctx.stroke()}function line(k,col){ctx.strokeStyle=col;ctx.lineWidth=1.8;ctx.beginPath();optics.forEach((o,i)=>{const xx=X(o.s),yy=Y(o[k]);i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy)});ctx.stroke()}line('bx','#62d6ff');line('by','#ffbf5e');const cur=X(frames[frame]?.s||0);ctx.strokeStyle='#fff';ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(cur,pT);ctx.lineTo(cur,h-pB);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#62d6ff';ctx.fillText(`βx · ${(currentCell.tx?currentCell.tx.mu*180/Math.PI:0).toFixed(1)}°/cell`,pL,15);ctx.fillStyle='#ffbf5e';ctx.fillText('βy',pL+150,15);ctx.fillStyle='#aeb9c9';ctx.textAlign='center';ctx.fillText('s [m]',w/2,h-10)}
+function drawDispersion(){const c=document.getElementById('dispersion'),ctx=c.getContext('2d'),w=c.width,h=c.height,pL=52,pR=30,pT=24,pB=32;ctx.fillStyle='#0b1018';ctx.fillRect(0,0,w,h);ctx.textAlign='left';let max=1;for(const d of dispersion)max=Math.max(max,Math.abs(d.eta));max*=1.15;const X=s=>pL+s/Math.max(totalS,1)*(w-pL-pR),Y=v=>pT+(max-v)/(2*max)*(h-pT-pB);let s0=0;for(const e of elements){const xa=X(s0),xb=X(s0+e.L);ctx.fillStyle=e.type==='sbend'?'rgba(112,225,161,.20)':e.type==='quad'?(e.k>0?'rgba(70,160,255,.12)':'rgba(255,100,90,.12)'):'rgba(120,130,145,.05)';ctx.fillRect(xa,pT,Math.max(2,xb-xa),h-pT-pB);s0+=e.L;}ctx.strokeStyle='#293547';ctx.beginPath();ctx.moveTo(pL,Y(0));ctx.lineTo(w-pR,Y(0));ctx.stroke();ctx.strokeStyle='#70e1a1';ctx.lineWidth=1.8;ctx.beginPath();dispersion.forEach((d,i)=>{const x=X(d.s),y=Y(d.eta);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();ctx.strokeStyle='#55a8ff';ctx.setLineDash([5,4]);ctx.beginPath();dispersion.forEach((d,i)=>{const x=X(d.s),y=pT+(0.5-(clamp(d.etap,-1,1))/2)*(h-pT-pB);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#70e1a1';ctx.fillText('η [m]',pL,15);ctx.fillStyle='#55a8ff';ctx.fillText('η′ [scaled]',pL+70,15);ctx.fillStyle='#aeb9c9';ctx.textAlign='center';ctx.fillText('s [m]',w/2,h-10);}
+
+function currentElement(){const f=frames[frame]||{};return f.microIndex>=0?micro[f.microIndex]:null;}
+function actions(q,opt){if(!opt)return {Jx:0,Jy:0,Jz:0,nx:0,ny:0,nz:0,psix:0,psiy:0,psiz:0};const xb=q.x-(opt.eta||0)*q.d,xpb=q.xp-(opt.etap||0)*q.d;const Jx=.5*(opt.gx*xb*xb+2*opt.ax*xb*xpb+opt.bx*xpb*xpb),Jy=.5*(opt.gy*q.y*q.y+2*opt.ay*q.y*q.yp+opt.by*q.yp*q.yp),Jz=.5*(opt.gz*q.z*q.z+2*opt.az*q.z*q.d+opt.bz*q.d*q.d);return {Jx,Jy,Jz,nx:Jx/CFG.emitX,ny:Jy/CFG.emitY,nz:Jz/CFG.emitZ,psix:Math.atan2(-(opt.ax*xb/Math.sqrt(opt.bx)+Math.sqrt(opt.bx)*xpb),xb/Math.sqrt(opt.bx)),psiy:Math.atan2(-(opt.ay*q.y/Math.sqrt(opt.by)+Math.sqrt(opt.by)*q.yp),q.y/Math.sqrt(opt.by)),psiz:Math.atan2(-(opt.az*q.z/Math.sqrt(opt.bz)+Math.sqrt(opt.bz)*q.d),q.z/Math.sqrt(opt.bz))};}
+function cylindrical(q){const r=Math.hypot(q.x,q.y),phi=Math.atan2(q.y,q.x),eps=1e-14;return {r,phi,deg:phi*180/Math.PI,drds:r>eps?(q.x*q.xp+q.y*q.yp)/r:0,dphids:r>eps?(q.x*q.yp-q.y*q.xp)/(r*r):0}}
+function opticalPointAtFrame(){const s=frames[frame]?.s||0;let idx=0;while(idx<optics.length-1&&optics[idx+1].s<=s+1e-9)idx++;const o=optics[idx]||{bx:currentCell.tx?.beta||1,ax:currentCell.tx?.alpha||0,by:currentCell.ty?.beta||1,ay:currentCell.ty?.alpha||0};const d=currentDispAtFrame();return {bx:o.bx,ax:o.ax,gx:gammaFrom(o.bx,o.ax),by:o.by,ay:o.ay,gy:gammaFrom(o.by,o.ay),bz:CFG.betaZ,az:CFG.alphaZ,gz:gammaFrom(CFG.betaZ,CFG.alphaZ),eta:d.eta,etap:d.etap};}
+function currentDispAtFrame(){const s=frames[frame]?.s||0;let idx=0;while(idx<dispersion.length-1&&dispersion[idx+1].s<=s+1e-9)idx++;return dispersion[idx]||{eta:currentCell.disp?.eta||0,etap:currentCell.disp?.etap||0};}
+function matrixString(M){return M.map(row=>row.map(v=>(Math.abs(v)<5e-13?0:v).toExponential(4).padStart(12)).join(' ')).join('\n');}
+
+let selected=[];let levels=new Map();let history=new Map();let frame=0;let playing=true;let speed=1;let last=performance.now(),acc=0;
+let heatCache=new Map();
+let driftProbeL=1.0;
+function setDriftProbe(v){driftProbeL=clamp(Number(v),0,5);render()}
+function clearHeatCache(){heatCache.clear()}
+function heatKey(kind,rX,rY,bx,by){return [frame,kind,rX[0],rX[1],rY[0],rY[1],bx,by].join('|')}
+function toggleSelect(id){if(!Number.isInteger(id)||id<0||id>=CFG.N)return;const idx=selected.indexOf(id);if(idx>=0){levels.set(id,Math.min((levels.get(id)||1)+1,6));}else{if(selected.length>=CFG.maxSelected){const old=selected.shift();levels.delete(old);history.delete(old)}selected.push(id);levels.set(id,1);history.set(id,[]);}updateStatus();render();}
+function goDeeper(id){levels.set(id,Math.min(6,(levels.get(id)||1)+1));render();}
+function collapse(id){levels.set(id,1);render();}
+function removeSel(id){const i=selected.indexOf(id);if(i>=0)selected.splice(i,1);levels.delete(id);history.delete(id);render();}
+function updateHistory(){for(const id of selected){if(!history.has(id))history.set(id,[]);const q=particles[id],pose=referencePoses[frame];const P=pose?worldFromLocal(pose,q):{X:q.x,Y:q.y,Z:frames[frame]?.s||0};const h=history.get(id);if(h.length&&h[h.length-1].f===frame)continue;h.push({f:frame,s:frames[frame]?.s||0,x:q.x,xp:q.xp,y:q.y,yp:q.yp,z:q.z,d:q.d,X:P.X,Y:P.Y,Z:P.Z});if(h.length>320)h.shift()}}
+function selectNearest(canvas,kind,ev){ev.preventDefault();const rect=canvas.getBoundingClientRect(),px=(ev.clientX-rect.left)*canvas.width/rect.width,py=(ev.clientY-rect.top)*canvas.height/rect.height,p=44,rX=ZOOM[kind].x,rY=ZOOM[kind].y;let best=-1,bestD=34*34;for(let i=0;i<particles.length;i++){let a,b;if(kind==='xx'){a=sx(particles[i].x*1000,rX,canvas.width,p);b=sy(particles[i].xp*1000,rY,canvas.height,p)}else if(kind==='yy'){a=sx(particles[i].y*1000,rX,canvas.width,p);b=sy(particles[i].yp*1000,rY,canvas.height,p)}else if(kind==='xy'){a=sx(particles[i].x*1000,rX,canvas.width,p);b=sy(particles[i].y*1000,rY,canvas.height,p)}else{a=sx(particles[i].z*1000,rX,canvas.width,p);b=sy(particles[i].d,rY,canvas.height,p)}const d=(a-px)**2+(b-py)**2;if(d<bestD){bestD=d;best=i}}if(best>=0){playing=false;document.getElementById('play').textContent='Play';toggleSelect(best)}}
+function select3D(ev){ev.preventDefault();const c=document.getElementById('c3d'),r=c.getBoundingClientRect(),mx=(ev.clientX-r.left)*c.width/r.width,my=(ev.clientY-r.top)*c.height/r.height;let best=-1,bd=30*30;for(let i=0;i<particles.length;i++){const P=particleWorldAt(frame,i);if(!P)continue;const pp=project3DWorld(P,c.width,c.height),d=(pp.x-mx)**2+(pp.y-my)**2;if(d<bd){bd=d;best=i}}if(best>=0){playing=false;document.getElementById('play').textContent='Play';toggleSelect(best)}}
+function addPickCircle(svg,i,x,y,r){const ns='http://www.w3.org/2000/svg',c=document.createElementNS(ns,'circle');c.classList.add('pick');c.setAttribute('cx',x.toFixed(2));c.setAttribute('cy',y.toFixed(2));c.setAttribute('r',r);c.addEventListener('click',ev=>{ev.preventDefault();ev.stopPropagation();playing=false;document.getElementById('play').textContent='Play';toggleSelect(i)});svg.appendChild(c)}
+function updatePickLayers(){const cfgs=[['cxx','pick_cxx','xx'],['cyy','pick_cyy','yy'],['cxy','pick_cxy','xy'],['czd','pick_czd','zd']];for(const [cid,sid,kind] of cfgs){const svg=document.getElementById(sid);while(svg.firstChild)svg.removeChild(svg.firstChild);const w=svg.viewBox.baseVal.width,h=svg.viewBox.baseVal.height,p=44,rX=ZOOM[kind].x,rY=ZOOM[kind].y;for(let i=0;i<particles.length;i++){let x,y;if(kind==='xx'){x=sx(particles[i].x*1000,rX,w,p);y=sy(particles[i].xp*1000,rY,h,p)}else if(kind==='yy'){x=sx(particles[i].y*1000,rX,w,p);y=sy(particles[i].yp*1000,rY,h,p)}else if(kind==='xy'){x=sx(particles[i].x*1000,rX,w,p);y=sy(particles[i].y*1000,rY,h,p)}else{x=sx(particles[i].z*1000,rX,w,p);y=sy(particles[i].d,rY,h,p)}if(x>=p-20&&x<=w-p+20&&y>=p-20&&y<=h-p+20)addPickCircle(svg,i,x,y,14)}}const svg3=document.getElementById('pick_c3d');while(svg3.firstChild)svg3.removeChild(svg3.firstChild);const w3=svg3.viewBox.baseVal.width,h3=svg3.viewBox.baseVal.height;for(let i=0;i<particles.length;i++){const P=particleWorldAt(frame,i);if(!P)continue;const pp=project3DWorld(P,w3,h3);addPickCircle(svg3,i,pp.x,pp.y,16)}}
+
+function infoCard(id,kind){const q=particles[id],si=selected.indexOf(id),o=opticalPointAtFrame(),a=actions(q,o),d=currentDispAtFrame();return `<div class="card" style="border-color:${COLORS[si]}88"><div class="cardhead" style="color:${COLORS[si]}">e− #${id+1}</div><div class="grid2"><div><span class="tag">x:</span> ${(q.x*1000).toFixed(4)} mm</div><div><span class="tag">x′:</span> ${(q.xp*1000).toFixed(4)} mrad</div><div><span class="tag">y:</span> ${(q.y*1000).toFixed(4)} mm</div><div><span class="tag">y′:</span> ${(q.yp*1000).toFixed(4)} mrad</div><div><span class="tag">z:</span> ${(q.z*1000).toFixed(4)} mm</div><div><span class="tag">δ:</span> ${q.d.toExponential(3)}</div></div><div class="small">η = ${(d.eta).toFixed(4)} m · nₓ = ${a.nx.toFixed(3)}</div></div>`}
+function renderCards(){for(const [el,kind] of [['ixx','xx'],['iyy','yy'],['ixy','xy'],['izd','zd']])document.getElementById(el).innerHTML=selected.map(id=>infoCard(id,kind)).join('');document.getElementById('irf').innerHTML=selected.map((id,si)=>{const q=particles[id],ph=Number.isFinite(q.phi)?q.phi:CFG.synchronousPhase;return `<div class="card" style="border-color:${COLORS[si]}88"><div class="cardhead" style="color:${COLORS[si]}">e− #${id+1} · RF</div><div class="grid2"><div><span class="tag">φ:</span> ${ph.toFixed(4)} rad</div><div><span class="tag">E:</span> ${(q.energyGeV||0).toFixed(6)} GeV</div><div><span class="tag">z:</span> ${(q.z*1000).toFixed(4)} mm</div><div><span class="tag">δ:</span> ${q.d.toExponential(3)}</div></div></div>`}).join('')}
+function renderCyl(){const el=document.getElementById('cylPanel');if(!selected.length){el.classList.add('hidden');el.innerHTML='';return}let h='<div class="cyl-title">Cylindrical transverse diagnostics</div><div class="eq">r = √(x²+y²)</div><div class="eq">φ = atan2(y,x)</div><div class="eq">dr/ds = (x·x′+y·y′)/r</div><div class="eq">dφ/ds = (x·y′−y·x′)/r²</div>';for(const [si,id] of selected.entries()){const c=cylindrical(particles[id]);h+=`<div style="margin-top:5px;border-top:1px solid rgba(160,180,205,.16);padding-top:4px"><b style="color:${COLORS[si]}">Particle ${id+1}</b><div class="cyl-row"><span class="tag">r</span><span>${(c.r*1000).toFixed(4)} mm</span><span class="tag">φ</span><span>${c.deg.toFixed(2)}°</span><span class="tag">dr/ds</span><span>${c.drds.toExponential(3)}</span><span class="tag">dφ/ds</span><span>${c.dphids.toExponential(3)} rad/m</span></div></div>`}el.innerHTML=h;el.classList.remove('hidden')}
+
+function fullTurnMatrix(){let M=identity6();for(const e of elements)M=mat6Mul(elementMatrix6(e),M);return M;}
+function det6(A){const n=A.length,M=A.map(r=>r.slice());let det=1;for(let i=0;i<n;i++){let p=i;for(let j=i+1;j<n;j++)if(Math.abs(M[j][i])>Math.abs(M[p][i]))p=j;if(Math.abs(M[p][i])<1e-15)return 0;if(p!==i){[M[p],M[i]]=[M[i],M[p]];det=-det}const piv=M[i][i];det*=piv;for(let j=i+1;j<n;j++){const f=M[j][i]/piv;if(f===0)continue;for(let k=i+1;k<n;k++)M[j][k]-=f*M[i][k]}}return det}
+function transverseMatrixAtDelta(plane,delta){let M=[[1,0],[0,1]];for(const e of elements){let E;if(e.type==='drift')E=drift2(e.L);else if(e.type==='quad')E=plane==='x'?quad2(e.L,e.k/(1+delta)):quadY2(e.L,e.k/(1+delta));else if(e.type==='sbend'){E=sector2(e.L,e.rho)}else continue;M=mat2Mul(E,M)}return M;}
+function advancedDiagnostics(){
+  const {gamma,beta}=rel(),ring=machineKind==='ring',trX=currentCell.tx?.trace??NaN,muX=currentCell.tx?.mu??NaN,M6=fullTurnMatrix();
+  const fullR56=M6[4][5],turnTrX=M6[0][0]+M6[1][1],Lslip=totalS/(beta*gamma*gamma),kRF=2*Math.PI*effectiveRFFrequency()/CFG.c,A=CFG.rfVoltageGeV/(Math.max(beta*beta,1e-15)*CFG.referenceEnergyGeV),trSimple=2-A*kRF*Lslip*Math.cos(CFG.synchronousPhase),disc=trSimple*trSimple-4,lam=disc>0?(trSimple+Math.sqrt(disc))/2:1,growth=lam-1;
+  let chrom=null;if(Number.isFinite(muX)){const dd=.001,mp=phaseFrom2(transverseMatrixAtDelta('x',dd)),mm=phaseFrom2(transverseMatrixAtDelta('x',-dd));if(mp!==null&&mm!==null)chrom=(mp-mm)/(2*dd)/(2*Math.PI)}
+  const alphaP=ring&&Number.isFinite(pathCompactionIntegral)?pathCompactionIntegral/Math.max(totalS,1e-30):NaN,gammaT=alphaP>0?1/Math.sqrt(alphaP):NaN;
+  let closedOrbit=[NaN,NaN];if(ring&&Math.abs(CFG.orbitKickMr)>1e-15){const Mx=matrix2From6(M6),D=[[1-Mx[0][0],-Mx[0][1]],[-Mx[1][0],1-Mx[1][1]]],b=kickAtEnd(),det=D[0][0]*D[1][1]-D[0][1]*D[1][0];if(Math.abs(det)>1e-14)closedOrbit=[(b[0]*D[1][1]-D[0][1]*b[1])/det,(D[0][0]*b[1]-b[0]*D[1][0])/det]}
+  const det6M=det6(M6),eps=1e-12;const state=trSimple>2+eps?'hyperbolic':trSimple<-2-eps?'hyperbolic':Math.abs(trSimple)<2-eps?'elliptic':'parabolic';return {gamma,beta,trX,muX,turnTrX,det6M,fullR56,Lslip,kRF,A,trSimple,growth,state,chrom,alphaP,gammaT,ring,M6,closedOrbit};
+}
+function kickAtEnd(){const ki=elements.findIndex(e=>e.type==='kick');let v=[0,CFG.orbitKickMr*1e-3,0,0,0,0];if(ki<0)return [0,v[1]];for(let i=ki+1;i<elements.length;i++){const E=elementMatrix6(elements[i]);v=E.map(row=>row.reduce((t,a,j)=>t+a*v[j],0));}return [v[0],v[1]];}
+function cellLength(){return ringCell(kQ).reduce((s,e)=>s+e.L,0)}
+function eStartOf(e){let s=0;for(const x of elements){if(x===e)return s;s+=x.L}return s}
+function radialK(){return currentCell.tx?((currentCell.tx.beta||1)>0?0:0):0}
+
+function canonicalJ6(){
+  return [[0,1,0,0,0,0],[-1,0,0,0,0,0],[0,0,0,1,0,0],[0,0,-1,0,0,0],[0,0,0,0,0,1],[0,0,0,0,-1,0]];
+}
+function mat6Transpose(A){return A[0].map((_,j)=>A.map(r=>r[j]));}
+function maxAbs6(A){let m=0;for(const r of A)for(const v of r)m=Math.max(m,Math.abs(v));return m;}
+function linearMicroMap(m){
+  if(m.type==='drift')return mat6Mul(slip6(m.ds),makeDrift6(m.ds));
+  if(m.type==='quad')return mat6Mul(slip6(m.ds),quad6(m.ds,m.k));
+  if(m.type==='sbend')return mat6Mul(slip6(m.ds),sector6(m.ds,m.rho));
+  if(m.type==='solenoid'){
+    const K=(NL.qe*m.Bz)/(2*Math.max(momentumSIFromEnergyGeV(CFG.referenceEnergyGeV),1e-30));
+    return mat6Mul(slip6(m.ds),solenoid6(m.ds,K));
+  }
+  if(m.type==='rf')return rfLinear6(m.VGeV,m.freq,m.phiS);
+  return identity6();
+}
+function oneTurnMapProduct(){
+  // Linearize the same sliced element sequence used by propagateOne(). This
+  // keeps RF voltage weights and distributed bend-slip maps consistent.
+  let M=identity6();
+  for(const m of micro){ M=mat6Mul(linearMicroMap(m),M); }
+  return M;
+}
+function numerical6DMapDiagnostic(){
+  if(numericalMapCache)return numericalMapCache;
+  return {status:'pending',M:oneTurnMapProduct(),det:NaN,maxSym:NaN,step:CFG.integrationStep};
+}
+function trackerOneTurn(q0,step=CFG.integrationStep){
+  // Independent multi-turn diagnostic using the same canonical element maps as the display tracker.
+  const q=researchCopy(q0);q.alive=true;
+  for(const m of micro)propagateOne(q,m);
+  return q;
+}
+function buildNumericalMap(){
+  if(diagnosticBusy||numericalMapCache)return;
+  diagnosticBusy=true;diagnosticMessage='building numerical 6D map…';
+  const base={x:0,xp:0,y:0,yp:0,z:0,d:0};
+  const names=['x','xp','y','yp','z','d'];
+  const scales=[2e-6,2e-6,2e-6,2e-6,2e-5,2e-6];
+  const cols=[]; let j=0;
+  function next(){
+    if(j>=6){
+      const M=cols[0].map((_,i)=>cols.map(c=>c[i]));
+      const J=canonicalJ6(),MT=mat6Transpose(M),MTJ=mat6Mul(mat6Mul(MT,J),M);
+      const R=MTJ.map((r,i)=>r.map((v,k)=>v-J[i][k]));
+      numericalMapCache={status:'ready',M,det:det6(M),maxSym:maxAbs6(R),step:CFG.integrationStep};
+      diagnosticBusy=false;diagnosticMessage='numerical map ready';render();return;
+    }
+    const qp={...base},qm={...base},n=names[j];
+    qp[n]+=scales[j];qm[n]-=scales[j];
+    setTimeout(()=>{
+      try{
+        const fp=trackerOneTurn(qp),fm=trackerOneTurn(qm);
+        cols.push(names.map((_,i)=>(fp[names[i]]-fm[names[i]])/(2*scales[j])));
+      }catch(e){cols.push(Array(6).fill(NaN));}
+      j++; next();
+    },0);
+  }
+  next();
+}
+function tuneFromNumericalMap(M){
+  if(!M)return {x:NaN,y:NaN,z:NaN};
+  const phase=(a,b)=>{const tr=(M[a][a]+M[b][b])/2;return Math.abs(tr)<1?Math.acos(clamp(tr,-1,1))/(2*Math.PI):NaN};
+  return {x:phase(0,1),y:phase(2,3),z:phase(4,5)};
+}
+function covariance6FromParticles(){
+  const qs=particles.filter(q=>q.alive!==false); if(qs.length<7)return null;
+  const names=['x','xp','y','yp','z','d'],mu=names.map(n=>qs.reduce((s,q)=>s+q[n],0)/qs.length);
+  const S=Array.from({length:6},()=>Array(6).fill(0));
+  for(const q of qs){const v=names.map((n,i)=>q[n]-mu[i]);for(let i=0;i<6;i++)for(let j=0;j<6;j++)S[i][j]+=v[i]*v[j]/(qs.length-1);}
+  return S;
+}
+function eigenEmittances6D(S){
+  if(!S)return null;
+  const J=canonicalJ6(),A=mat6Mul(mat6Mul(S,J),mat6Mul(S,J));
+  // For a stable positive covariance, eigenvalues of -SJSJ are ε_i² (double).
+  const B=A.map(r=>r.map(v=>-v));
+  // Jacobi eigenvalues for the real symmetric matrix B.
+  const n=6,V=B.map((r,i)=>r.map((_,j)=>i===j?1:0));
+  for(let it=0;it<80;it++){
+    let p=0,q=1,max=0;
+    for(let i=0;i<n;i++)for(let j=i+1;j<n;j++)if(Math.abs(B[i][j])>max){max=Math.abs(B[i][j]);p=i;q=j;}
+    if(max<1e-18)break;
+    const phi=.5*Math.atan2(2*B[p][q],B[q][q]-B[p][p]),c=Math.cos(phi),sn=Math.sin(phi);
+    for(let k=0;k<n;k++){const bpk=B[p][k],bqk=B[q][k];B[p][k]=c*bpk-sn*bqk;B[q][k]=sn*bpk+c*bqk;}
+    for(let k=0;k<n;k++){const bkp=B[k][p],bkq=B[k][q];B[k][p]=c*bkp-sn*bkq;B[k][q]=sn*bkp+c*bkq;}
+  }
+  const vals=B.map((r,i)=>Math.max(r[i],0)).sort((a,b)=>b-a);
+  return [Math.sqrt(vals[0]||0),Math.sqrt(vals[2]||0),Math.sqrt(vals[4]||0)];
+}
+function drawValidation(){
+  const c=document.getElementById('validation');if(!c)return;
+  const ctx=c.getContext('2d'),w=c.width,h=c.height;
+  ctx.fillStyle='#0b1018';ctx.fillRect(0,0,w,h);
+  const d=numerical6DMapDiagnostic(),t=tuneFromNumericalMap(d.M),eps=eigenEmittances6D(covariance6FromParticles());
+  ctx.fillStyle='#dce6f2';ctx.font='12px system-ui';
+  ctx.fillText('Physics validation · analytic lattice + numerical nonlinear 6D map',18,22);
+  const rows=[
+    ['numerical map',d.status||'analytic fallback'],
+    ['det(M₆)',Number.isFinite(d.det)?d.det.toFixed(8):'pending'],
+    ['symplectic residual',Number.isFinite(d.maxSym)?d.maxSym.toExponential(3):'pending'],
+    ['νx / νy / νz',`${Number.isFinite(t.x)?t.x.toFixed(5):'—'} / ${Number.isFinite(t.y)?t.y.toFixed(5):'—'} / ${Number.isFinite(t.z)?t.z.toFixed(5):'—'}`],
+    ['eigenemittances',eps?eps.map(v=>v.toExponential(3)).join(' / '):'pending'],
+    ['integration ds',`${(CFG.integrationStep*1000).toFixed(2)} mm`],
+    ['RF model','canonical sinusoidal energy kick'],
+    ['magnet fields','ideal sector/quad/solenoid element maps'],
+    ['fringe',CFG.fringeFraction>0?'Enge polynomial':'hard edge'],
+    ['radiation','disabled in canonical symplectic mode'],
+    ['quantum recoil','disabled in canonical symplectic mode'],
+    ['status',diagnosticMessage]
+  ];
+  ctx.font='11px system-ui';
+  rows.forEach((r,i)=>{
+    const col=i<6?0:1,row=i<6?i:i-6,x=18+col*w/2,y=48+row*30;
+    ctx.fillStyle='#9eabbc';ctx.textAlign='left';ctx.fillText(r[0],x,y);
+    ctx.fillStyle='#e5edf6';ctx.textAlign='right';ctx.fillText(r[1],x+w/2-25,y);
+  });
+  ctx.textAlign='left';ctx.fillStyle='#748196';
+  ctx.fillText('Symplectic residual is meaningful for the canonical Hamiltonian map; radiation/recoil and imported field-map tracking are inactive.',18,h-14);
+}
+function updateStatus(){const st=document.getElementById('status');if(simError){st.className='status warn';st.textContent=`Simulation stopped safely at step ${Math.max(0,frames.length-1)}: ${simError}. Reduce phase advance / KQ or RF strength, then Reset.`;return}const adv=advancedDiagnostics();const mu=(currentCell.tx?.mu||0)*180/Math.PI;st.className='status';st.textContent=`${machineKind==='ring'?'Closed ring':'Matched FODO'} · μx = ${mu.toFixed(2)}°/cell · KQ = ${kQ.toFixed(4)} m⁻² · η = ${(currentCell.disp?.eta||0).toFixed(4)} m · Tr(Mz) = ${adv.trSimple.toFixed(9)} (${adv.state}) · canonical symplectic map mode · radiation/recoil disabled.`;document.getElementById('phaseVal').textContent=`${mu.toFixed(1)}°`;document.getElementById('kVal').textContent=kQ.toFixed(3)}
+function levelBlock(id,si,level){
+  const q=particles[id],o=opticalPointAtFrame(),a=actions(q,o),c=cylindrical(q),d=currentDispAtFrame(),f=currentElement(),adv=advancedDiagnostics();
+  let html='';
+  html += '<div class="inspect-block" style="border-color:'+COLORS[si]+'66">';
+  html += '<h3 style="color:'+COLORS[si]+'">Particle '+(id+1)+' · Level '+level+'</h3>';
+  html += '<div class="inspect-value"><span>x / x′</span><b>'+fmt(q.x*1000,5)+' / '+fmt(q.xp*1000,5)+' mm·mrad</b></div>';
+  html += '<div class="inspect-value"><span>y / y′</span><b>'+fmt(q.y*1000,5)+' / '+fmt(q.yp*1000,5)+' mm·mrad</b></div>';
+  html += '<div class="inspect-value"><span>z / δ</span><b>'+fmt(q.z*1000,5)+' mm / '+q.d.toExponential(5)+'</b></div>';
+  const desc=['','Basics: particle coordinates relative to the design trajectory.','Optics: the particle is interpreted inside the matched Courant–Snyder frame.','Geometry: cylindrical diagnostics are derived from the Cartesian path.','Off-momentum transport: dipole dispersion and path-length coupling are explicit.','Matrix view: inspect the actual local element and lattice stability.','Expert view: chromaticity, transition diagnostics, forcing, and model limits.'][level]||'';
+  html += '<div class="small">'+desc+'</div>';
+  if(level>=2){
+    html += '<hr><div class="inspect-value"><span>βx / αx</span><b>'+o.bx.toFixed(5)+' m / '+o.ax.toFixed(5)+'</b></div>';
+    html += '<div class="inspect-value"><span>βy / αy</span><b>'+o.by.toFixed(5)+' m / '+o.ay.toFixed(5)+'</b></div>';
+    html += '<div class="inspect-value"><span>βz / αz</span><b>'+o.bz.toFixed(5)+' m / '+o.az.toFixed(5)+'</b></div>';
+    html += '<div class="inspect-value"><span>Jx / Jy / Jz</span><b>'+a.Jx.toExponential(5)+' / '+a.Jy.toExponential(5)+' / '+a.Jz.toExponential(5)+'</b></div>';
+    html += '<div class="inspect-value"><span>nₓ / nᵧ / n_z</span><b>'+a.nx.toFixed(4)+' / '+a.ny.toFixed(4)+' / '+a.nz.toFixed(4)+'</b></div>';
+    html += '<div class="small eq">Jx = nₓεx, Jy = nᵧεy, Jz = n_zεz; βγ−α² = 1 in each uncoupled plane.</div>';
+  }
+  if(level>=3){
+    html += '<hr><div class="inspect-value"><span>r / φ</span><b>'+fmt(c.r*1000,5)+' mm / '+fmt(c.deg,3)+'°</b></div>';
+    html += '<div class="inspect-value"><span>dr/ds</span><b>'+c.drds.toExponential(5)+'</b></div>';
+    html += '<div class="inspect-value"><span>dφ/ds</span><b>'+c.dphids.toExponential(5)+' rad/m</b></div>';
+    html += '<div class="small eq">r = √(x²+y²), φ = atan2(y,x), dr/ds = (xx′+yy′)/r, dφ/ds = (xy′−yx′)/r²</div>';
+    html += '<div class="inspect-value"><span>Drift probe L</span><b>'+driftProbeL.toFixed(2)+' m</b></div><input style="width:100%" type="range" min="0" max="5" step="0.05" value="'+driftProbeL+'" oninput="setDriftProbe(this.value)">';
+    html += '<div class="inspect-value"><span>projected x / y / z</span><b>'+fmt((q.x+driftProbeL*q.xp)*1000,4)+' / '+fmt((q.y+driftProbeL*q.yp)*1000,4)+' / '+fmt((q.z+driftProbeL*q.d)*1000,4)+' mm</b></div>';
+    html += '<div class="small eq">x(L)=x₀+Lx′₀, y(L)=y₀+Ly′₀, z(L)=z₀+Lδ</div>';
+  }
+  if(level>=4){
+    html += '<hr><div class="inspect-value"><span>η / η′</span><b>'+d.eta.toFixed(6)+' m / '+d.etap.toFixed(6)+'</b></div>';
+    html += '<div class="inspect-value"><span>ηδ offset</span><b>'+fmt(d.eta*q.d*1000,6)+' mm</b></div>';
+    html += '<div class="inspect-value"><span>local element</span><b>'+escapeHtml(f?f.name:'start')+'</b></div>';
+    html += '<div class="inspect-value"><span>full-lattice R56</span><b>'+adv.fullR56.toExponential(5)+' m</b></div>';
+    html += '<div class="inspect-value"><span>velocity R56</span><b>'+adv.Lslip.toExponential(5)+' m</b></div>';
+    if(f&&f.type==='sbend'){const th=f.ds/f.rho;const rg=f.rho*(th-Math.sin(th));const dz=-Math.sin(th)*q.x-f.rho*(1-Math.cos(th))*q.xp+rg*q.d;html += '<div class="inspect-value"><span>dipole θ / geometric R56</span><b>'+(th*1000).toFixed(4)+' mrad / '+rg.toExponential(5)+' m</b></div>';html += '<div class="inspect-value"><span>local dipole Δz</span><b>'+fmt(dz*1000,7)+' mm</b></div>';}
+    html += '<div class="small eq">x″+Kx·x=Gδ, y″+Ky·y=0</div>';
+    html += '<div class="small eq">r″=[x(Gδ−Kx·x)+y(−Ky·y)+x′²+y′²−r′²]/r</div>';
+    html += '<div class="small">The sector-bend matrix carries Cartesian x/x′↔z coupling. The velocity-slip contribution is separate and scales as 1/(βγ²). In first-order optics, δ-coupling in the matrix—not a nonlinear replacement ρ→ρ(1+δ)—represents dispersion.</div>';
+  }
+  if(level>=5){
+    html += '<hr><div class="inspect-value"><span>μx / cell trace</span><b>'+((adv.muX*180/Math.PI).toFixed(4))+'° / '+adv.trX.toFixed(6)+'</b></div>';
+    html += '<div class="inspect-value"><span>simple longitudinal trace</span><b>'+adv.trSimple.toFixed(10)+'</b></div>';
+    html += '<div class="inspect-value"><span>growth</span><b>'+adv.growth.toExponential(5)+' · '+adv.state+'</b></div>';
+    html += '<div class="small">For the requested longitudinal linear map, Tr&nbsp;M&gt;2 is hyperbolic. This is kept separate from the full dipole path-length transport so the two effects are not conflated.</div>';
+  }
+  if(level>=6){
+    html += '<hr><div class="inspect-value"><span>γ / β</span><b>'+adv.gamma.toFixed(3)+' / '+adv.beta.toFixed(9)+'</b></div>';
+    html += '<div class="inspect-value"><span>det full 6×6 map</span><b>'+adv.det6M.toFixed(8)+'</b></div>';
+    html += '<div class="inspect-value"><span>quadrupole chromaticity dQx/dδ</span><b>'+(adv.chrom===null?'n/a':adv.chrom.toFixed(5))+'</b></div>';
+    html += '<div class="inspect-value"><span>αp = (1/C)∮η/ρ ds</span><b>'+(Number.isFinite(adv.alphaP)?adv.alphaP.toExponential(5):'not ring')+'</b></div>';
+    html += '<div class="inspect-value"><span>γt</span><b>'+(Number.isFinite(adv.gammaT)?adv.gammaT.toFixed(5):'not defined')+'</b></div>';
+    html += '<div class="inspect-value"><span>closed orbit x / x′</span><b>'+orbitText(adv.closedOrbit)+'</b></div>';
+    html += '<div class="inspect-value"><span>adiabatic damping</span><b>inactive: E₀ fixed</b></div>';
+    html += '<div class="small">A nonzero orbit-kick control is a real thin transverse kick. In a ring, the displayed closed orbit solves (I−M)xco=d. Adiabatic damping is intentionally not applied because the reference energy is fixed during tracking.</div>';
+  }
+  html += '<div style="display:flex;gap:5px"><button class="deep-btn" onclick="goDeeper('+id+')">Go deeper →</button><button class="deep-btn" onclick="collapse('+id+')">Basics</button><button class="deep-btn" onclick="removeSel('+id+')">Remove</button></div></div>';
+  if(level>=5&&f){ html += '<div class="inspect-block"><h3>Current element 6×6 matrix</h3><div class="small">'+escapeHtml(f.name||f.type)+'</div><div class="matrix">'+matrixString(elementMatrix6(f))+'</div></div>'; }
+  if(level>=6){ html += '<div class="inspect-block"><h3>Requested longitudinal linearization</h3><div class="matrix">Tr M = 2 − A k B cos(φs)\nφ = φs − k z\nA = V/(β₀²E₀)\nB = L/(β₀γ₀²)</div></div>'; }
+  html += '</div>';
+  return html;
+}
+function fmt(v,n){return Number.isFinite(v)?v.toFixed(n):'n/a';}
+function escapeHtml(x){return String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function orbitText(o){return Number.isFinite(o[0])?fmt(o[0]*1000,5)+' mm / '+fmt(o[1]*1000,5)+' mrad':'kick = 0 or non-ring';}
+
+
+/* ======================= RESEARCH DYNAMICS MODULE =======================
+   This module is deliberately separated from the educational display.
+   It provides symplectic ideal-lattice studies, multi-turn tune extraction,
+   resonance scans, dynamic-aperture scans, closed-orbit solving, normal-mode
+   diagnostics, imported 3-D field-map interpolation, and self-tests.
+*/
+function researchOutput(txt,cls=''){const e=document.getElementById('researchOutput');if(e){e.className='research-output '+cls;e.textContent=txt;}}
+function researchCopy(q){return {x:q.x,xp:q.xp,y:q.y,yp:q.yp,z:q.z,d:q.d};}
+function researchApplyLinear(q,M){apply6(M,q);return q;}
+function researchNonlinearKick(q,e){
+  if(!e)return q;
+  const d=1+q.d;
+  if(e.type==='sextupole'){
+    const k=CFG.sextupoleK2; q.xp-=k*(q.x*q.x-q.y*q.y)/2; q.yp+=k*q.x*q.y;
+  }else if(e.type==='octupole'){
+    const k=CFG.octupoleK3; q.xp-=k*(q.x*q.x*q.x-3*q.x*q.y*q.y)/6; q.yp+=k*(3*q.x*q.x*q.y-q.y*q.y*q.y)/6;
+  }
+  return q;
+}
+function researchElementMap(e){
+  if(e.type==='sextupole'||e.type==='octupole')return identity6();
+  return elementMatrix6(e);
+}
+function researchTrackTurn(q,mode='symplectic'){
+  const out=researchCopy(q);out.xp*=1+out.d;out.yp*=1+out.d;
+  if(mode==='linear6d'){
+    for(const e of elements)researchApplyLinear(out,researchElementMap(e));
+  }else{
+    // Same canonical slice-by-slice map used by the main particle animation.
+    for(const m of micro)propagateOne(out,m);
+  }
+  out.xp/=Math.max(1+out.d,1e-9);out.yp/=Math.max(1+out.d,1e-9);
+  return out;
+}
+function researchInitialAt(nx,ny,nz){
+  const q=initial[0]||{x:0,xp:0,y:0,yp:0,z:0,d:0};
+  const tx=currentCell.tx,ty=currentCell.ty;const ex=Math.sqrt(CFG.emitX),ey=Math.sqrt(CFG.emitY);
+  return {x:nx*ex*Math.sqrt(tx.beta),xp:-nx*ex*tx.alpha/Math.sqrt(tx.beta),y:ny*ey*Math.sqrt(ty.beta),yp:-ny*ey*ty.alpha/Math.sqrt(ty.beta),z:nz*Math.sqrt(CFG.emitZ*CFG.betaZ),d:0};
+}
+function researchTune(q0,turns=1024){
+  const tx=currentCell.tx,ty=currentCell.ty,q=researchCopy(q0),px=[],py=[];let phx0=null,phy0=null,ux=0,uy=0;
+  for(let n=0;n<turns;n++){
+    const X=q.x/Math.sqrt(tx.beta),P=(tx.alpha*q.x+tx.beta*q.xp)/Math.sqrt(tx.beta),Y=q.y/Math.sqrt(ty.beta),Q=(ty.alpha*q.y+ty.beta*q.yp)/Math.sqrt(ty.beta);
+    const ax=Math.atan2(-P,X),ay=Math.atan2(-Q,Y);
+    if(phx0===null){phx0=ax;phy0=ay;}else{let dx=ax-(px.length?px[px.length-1]:phx0),dy=ay-(py.length?py[py.length-1]:phy0);while(dx>Math.PI)dx-=2*Math.PI;while(dx<-Math.PI)dx+=2*Math.PI;while(dy>Math.PI)dy-=2*Math.PI;while(dy<-Math.PI)dy+=2*Math.PI;ux+=dx;uy+=dy;}px.push(ax);py.push(ay);researchApplyLinear(q,identity6());const nq=researchTrackTurn(q,CFG.researchIntegrator);q.x=nq.x;q.xp=nq.xp;q.y=nq.y;q.yp=nq.yp;q.z=nq.z;q.d=nq.d;if(![q.x,q.xp,q.y,q.yp].every(Number.isFinite))break;
+  }
+  return {qx:Math.abs(ux)/(2*Math.PI*Math.max(1,px.length-1)),qy:Math.abs(uy)/(2*Math.PI*Math.max(1,py.length-1)),turns:px.length};
+}
+function researchClosedOrbit(){
+  const lin=oneTurnMapProduct(),I=identity6(),A=I.map((r,i)=>r.map((v,j)=>v-lin[i][j]));
+  const kick=kickAtEnd(),b=[kick[0],kick[1],0,0,0,0];
+  const solve=(inds,C0=A,bb0=b)=>{const n=inds.length,C=inds.map(i=>inds.map(j=>C0[i][j])),bb=inds.map(i=>bb0[i]);for(let i=0;i<n;i++){let p=i;for(let k=i+1;k<n;k++)if(Math.abs(C[k][i])>Math.abs(C[p][i]))p=k;if(Math.abs(C[p][i])<1e-14)return null;if(p!==i){[C[p],C[i]]=[C[i],C[p]];[bb[p],bb[i]]=[bb[i],bb[p]]}for(let k=i+1;k<n;k++){const f=C[k][i]/C[i][i];for(let j=i;j<n;j++)C[k][j]-=f*C[i][j];bb[k]-=f*bb[i];}}const x=Array(n);for(let i=n-1;i>=0;i--)x[i]=(bb[i]-C[i].slice(i+1).reduce((s,v,j)=>s+v*x[i+1+j],0))/C[i][i];return x};
+  let q={x:0,xp:0,y:0,yp:0,z:0,d:0};const x4=solve([0,1,2,3]);if(x4)Object.assign(q,{x:x4[0],xp:x4[1],y:x4[2],yp:x4[3]});
+  let nonlinearResidual=Infinity;for(let it=0;it<8;it++){
+    const f0=researchTrackTurn(q,'symplectic'),F=[f0.x-q.x,f0.xp-q.xp,f0.y-q.y,f0.yp-q.yp];nonlinearResidual=Math.hypot(...F);if(nonlinearResidual<1e-11)break;
+    const H=Array.from({length:4},()=>Array(4).fill(0)),names=['x','xp','y','yp'];for(let j=0;j<4;j++){const h=[1e-7,1e-7,1e-7,1e-7][j],qp=researchCopy(q),qm=researchCopy(q);qp[names[j]]+=h;qm[names[j]]-=h;const fp=researchTrackTurn(qp,'symplectic'),fm=researchTrackTurn(qm,'symplectic');for(let i=0;i<4;i++){const ni=names[i],df=(fp[ni]-fm[ni])/(2*h);H[i][j]=df-(i===j?1:0);}}
+    const rhs=F.map(v=>-v),dx=solve([0,1,2,3],H,rhs);if(!dx)break;for(let i=0;i<4;i++)q[names[i]]+=dx[i];
+  }
+  const z2=solve([4,5]);return {x4:[q.x,q.xp,q.y,q.yp],z2,nonlinearResidual,linear:lin};
+}
+function exportResearchMap(){const M=oneTurnMapProduct(),J=canonicalJ6(),R=mat6Mul(mat6Mul(mat6Transpose(M),J),M).map((r,i)=>r.map((v,j)=>v-J[i][j]));const payload={version:1,coordinateOrder:['x','xp','y','yp','z','delta'],referenceEnergyGeV:CFG.referenceEnergyGeV,matrix:M,determinant:det6(M),symplecticResidual:maxAbs6(R)};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='accelerator_6D_one_turn_map.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);researchOutput('Exported accelerator_6D_one_turn_map.json for comparison with external tracking/map codes.');}
+function runMultiTurnResearch(){
+  const turns=clamp(Math.round(Number(document.getElementById('researchTurns').value)||1024),16,20000),q=researchInitialAt(1,1,0);CFG.researchTurns=turns;const t=researchTune(q,turns);researchOutput(`MULTI-TURN HAMILTONIAN DIAGNOSTIC\nIntegrator: ${CFG.researchIntegrator}\nTurns: ${t.turns}\nνx = ${t.qx.toFixed(8)}\nνy = ${t.qy.toFixed(8)}\nReference linear νx = ${(currentCell.tx.mu/(2*Math.PI)).toFixed(8)}\nReference linear νy = ${(currentCell.ty.mu/(2*Math.PI)).toFixed(8)}\n\nRadiation and stochastic recoil are excluded from this symplectic analysis.`, 'research-good');}
+function runClosedOrbitResearch(){const d=researchClosedOrbit();researchOutput(`CLOSED-ORBIT / ONE-TURN MAP\nTransverse fixed point: ${d.x4?d.x4.map((v,i)=>`${['x','x′','y','y′'][i]}=${v.toExponential(6)}`).join('  '):'singular (no unique transverse fixed point)'}\nNonlinear transverse residual: ${d.nonlinearResidual.toExponential(3)}\nLongitudinal fixed point: ${d.z2?d.z2.map((v,i)=>`${['z','δ'][i]}=${v.toExponential(6)}`).join('  '):'not solved / singular'}\n\nThe reported transverse solution is refined with a nonlinear Newton solve of F(q)=T(q)−q using the symplectic research map; compare against the linear (I−M) solution before using it as a machine result.`);}
+function runNormalModesResearch(){const d=researchNormalModes();researchOutput(`COUPLED NORMAL-MODE DIAGNOSTIC\n4×4 transverse trace = ${d.trace4.toFixed(8)}\nuncoupled Tr(Mx) = ${d.planeTraces[0].toFixed(8)}\nuncoupled Tr(My) = ${d.planeTraces[1].toFixed(8)}\ndet(M6) = ${d.det.toFixed(8)}\nsymplectic residual = ${Number.isFinite(d.sym)?d.sym.toExponential(3):'not yet numerically measured'}\nmode eigenphases = ${d.tunes.map(v=>v.toFixed(8)).join(' / ')}\n\nFor solenoid/coupled optics, the full coupled eigenvectors—not separate x/y Twiss parameters—are the physically correct normal modes. The display above is a diagnostic; the full eigenvector decomposition is intentionally exposed in the validation output.`);}
+function runDynamicApertureResearch(){const turns=clamp(Math.round(Number(document.getElementById('researchTurns').value)||1024),64,20000),amp=clamp(Number(document.getElementById('dynAmp').value)||1,.1,20),rows=[];const maxA=amp*5,N=25;for(let i=1;i<=N;i++){const a=maxA*i/N,q=researchInitialAt(a,a,0);let lost=false,peak=0;for(let n=0;n<turns;n++){const nq=researchTrackTurn(q,CFG.researchIntegrator);Object.assign(q,nq);peak=Math.max(peak,Math.hypot(q.x,q.y));if(![q.x,q.xp,q.y,q.yp,q.z,q.d].every(Number.isFinite)||peak>.25){lost=true;break;}}rows.push({a,lost});}const surv=rows.filter(r=>!r.lost).map(r=>r.a);researchOutput(`DYNAMIC APERTURE DIAGNOSTIC\nTurns per launch: ${turns}\nAmplitude scan: 0 → ${maxA.toFixed(2)}σ\nSurviving launch amplitudes: ${surv.length}/${rows.length}\nEstimated radial dynamic aperture: ${surv.length?Math.max(...surv).toFixed(3):'below first probe'}σ\n\nThis is an ideal-lattice nonlinear survival boundary, not a measured machine aperture. Repeat versus δ, launch angle, and turn count for a real dynamic-aperture study.`);}
+function runResonanceResearch(){const turns=clamp(Math.round(Number(document.getElementById('researchTurns').value)||1024),64,4096),out=[];for(let a=.5;a<=4.0001;a+=.25){const t=researchTune(researchInitialAt(a,a,0),turns);out.push(`${a.toFixed(2)}σ : νx=${t.qx.toFixed(6)}  νy=${t.qy.toFixed(6)}`);}researchOutput(`NONLINEAR TUNE / RESONANCE DIAGNOSTIC\n${out.join('\n')}\n\nCandidate low-order resonance condition: mνx+nνy≈p. Inspect amplitude-dependent tune drift against 1/2, 1/3, 1/4 and coupling resonances.`);}
+function researchBenchmarks(){
+  const d=makeDrift6(1),q=quad6(.5,kQ),b=sector6(CFG.dipoleLength,CFG.dipoleLength/CFG.fodoTheta);const errs=[];
+  errs.push(['drift determinant',Math.abs(det6(d)-1)]);errs.push(['quad determinant',Math.abs(det6(q)-1)]);errs.push(['sector determinant',Math.abs(det6(b)-1)]);
+  const J=canonicalJ6();for(const [name,M] of [['drift',d],['quad',q],['sector',b]])errs.push([name+' symplectic residual',maxAbs6(mat6Mul(mat6Mul(mat6Transpose(M),J),M).map((r,i)=>r.map((v,j)=>v-J[i][j]))) ]);
+  const bad=errs.filter(x=>x[1]>1e-8);return {errs,bad};
+}
+function finiteDifferenceTrackerMap(q0,step=1e-7){
+  const names=['x','xp','y','yp','z','d'],cols=[];
+  const f=q=>{const v=researchCopy(q);for(const m of micro)propagateOne(v,m);return names.map(n=>v[n]);};
+  for(let j=0;j<6;j++){const qp=researchCopy(q0),qm=researchCopy(q0);qp[names[j]]+=step;qm[names[j]]-=step;const a=f(qp),b=f(qm);cols.push(a.map((v,i)=>(v-b[i])/(2*step)));}
+  return names.map((_,i)=>cols.map(c=>c[i]));
+}
+function runValidationSuite(){
+  try{
+    const unit=researchBenchmarks(),J=canonicalJ6(),q0={x:0,xp:0,y:0,yp:0,z:0,d:0},q1={x:1.2e-3,xp:1.1e-3,y:-.8e-3,yp:.7e-3,z:1e-3,d:.003};
+    const M0=finiteDifferenceTrackerMap(q0),M1=finiteDifferenceTrackerMap(q1);
+    const residual=M=>maxAbs6(mat6Mul(mat6Mul(mat6Transpose(M),J),M).map((r,i)=>r.map((v,j)=>v-J[i][j])));
+    const det0=det6(M0),sym0=residual(M0),sym1=residual(M1),analytic=oneTurnMapProduct();let maxMapDiff=0;
+    for(let i=0;i<6;i++)for(let j=0;j<6;j++)maxMapDiff=Math.max(maxMapDiff,Math.abs(M0[i][j]-analytic[i][j]));
+    const finite=frames.length>1&&frames.every(fr=>fr.particles.every(q=>[q.x,q.xp,q.y,q.yp,q.z,q.d].every(Number.isFinite)));
+    const passed=unit.bad.length===0&&finite&&Number.isFinite(det0)&&sym0<1e-7&&sym1<1e-6; const overallStatus=passed&&maxMapDiff<1e-5?'PASS':'PARTIAL PASS — local symplectic checks pass, but linear-map agreement needs review';
+    const report={version:'1.1.1',testDate:new Date().toISOString(),method:'Browser-side finite-difference Jacobian of the assembled canonical paraxial tracker',elements:elements.length,microSlices:micro.length,frames:frames.length,particles:initial.length,allTrackedStatesFinite:finite,elementMapChecks:unit.errs,elementMapFailures:unit.bad,trackerMapAtOrigin:{determinant:det0,symplecticResidual:sym0},trackerMapAtFiniteAmplitude:{symplecticResidual:sym1},maxAbsDifferenceVsIdealLinearElementProduct:maxMapDiff,linearMapComparison:maxMapDiff<1e-5?'MATCH':'MISMATCH — investigate differing element/coordinate conventions before quantitative use',localSymplecticTestsPass:passed,overallStatus};
+    researchOutput('VALIDATION SUITE v1.2.0\n'+JSON.stringify(report,null,2)+'\n\nInterpretation: the symplectic residual checks test local map structure; the analytic-vs-tracker comparison is reported separately and must agree before trusting quantitative optics. This suite is not an external MAD-X/Bmad benchmark.');
+    window.__acceleratorValidationReport=report;
+  }catch(err){researchOutput('VALIDATION SUITE ERROR: '+String(err&&err.stack||err),'research-bad');}
+}
+
+function parseFieldMapCSV(text){
+  const lines=text.split(/\r?\n/).map(x=>x.trim()).filter(Boolean),rows=[];if(!lines.length)throw new Error('Empty field-map file');
+  const first=lines[0].toLowerCase();const start=/[a-z]/.test(first)&&first.includes('x')?1:0;
+  for(let i=start;i<lines.length;i++){const a=lines[i].split(/[,;\s]+/).map(Number);if(a.length>=9&&a.slice(0,9).every(Number.isFinite))rows.push(a.slice(0,9));}
+  if(rows.length<2)throw new Error('Expected CSV columns x,y,z,Ex,Ey,Ez,Bx,By,Bz');
+  const xs=[...new Set(rows.map(r=>r[0]))].sort((a,b)=>a-b),ys=[...new Set(rows.map(r=>r[1]))].sort((a,b)=>a-b),zs=[...new Set(rows.map(r=>r[2]))].sort((a,b)=>a-b);const key=(x,y,z)=>x+'|'+y+'|'+z,map=new Map(rows.map(r=>[key(r[0],r[1],r[2]),r.slice(3)]));
+  function bracket(a,v){if(v<=a[0])return [0,0,0];if(v>=a[a.length-1])return [a.length-1,a.length-1,0];let lo=0,hi=a.length-1;while(hi-lo>1){const m=(lo+hi)>>1;if(a[m]<=v)lo=m;else hi=m;}return [lo,hi,(v-a[lo])/Math.max(a[hi]-a[lo],1e-30)];}
+  function sample(x,y,z,off){const bx=bracket(xs,x),by=bracket(ys,y),bz=bracket(zs,z);let out=Array(3).fill(0);for(let ix=0;ix<2;ix++)for(let iy=0;iy<2;iy++)for(let iz=0;iz<2;iz++){const wx=ix?bx[2]:1-bx[2],wy=iy?by[2]:1-by[2],wz=iz?bz[2]:1-bz[2],r=map.get(key(xs[bx[ix]],ys[by[iy]],zs[bz[iz]]));if(r)for(let k=0;k<3;k++)out[k]+=wx*wy*wz*r[off+k];}return out;}
+  return {E:(x,y,z,t)=>sample(x,y,z,0),B:(x,y,z,t)=>sample(x,y,z,3),meta:{rows:rows.length,nx:xs.length,ny:ys.length,nz:zs.length,extent:[xs[0],xs.at(-1),ys[0],ys.at(-1),zs[0],zs.at(-1)]}};
+}
+function wireResearchUI(){
+  const f=document.getElementById('fieldMapFile');if(f)f.onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{const fm=parseFieldMapCSV(await file.text());CFG.importedFieldMap=fm;document.getElementById('fieldMapStatus').textContent=`Loaded ${fm.meta.rows} nodes · grid ${fm.meta.nx}×${fm.meta.ny}×${fm.meta.nz} · E/B trilinear interpolation`;researchOutput('Field map parsed and retained for inspection/export. It is not consumed by the canonical paraxial symplectic tracker in this build.');}catch(err){document.getElementById('fieldMapStatus').textContent='Load failed: '+err.message;}};
+  const en=document.getElementById('fieldMapEnable');if(en)en.onchange=e=>{CFG.useImportedFieldMap=!!e.target.checked;buildAll();};
+  document.getElementById('clearFieldMap').onclick=()=>{CFG.importedFieldMap=null;CFG.useImportedFieldMap=false;document.getElementById('fieldMapEnable').checked=false;document.getElementById('fieldMapStatus').textContent='No field map loaded.';buildAll();};
+  const bf=document.getElementById('benchmarkFile');if(bf)bf.onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{const ref=JSON.parse(await file.text());researchOutput(JSON.stringify({reference:ref,internal:researchBenchmarks()},null,2));}catch(err){researchOutput('Reference benchmark load failed: '+err.message,'research-bad');}};
+  document.getElementById('researchTurns').onchange=e=>CFG.researchTurns=clamp(Math.round(Number(e.target.value)||1024),16,20000);
+  document.getElementById('researchIntegrator').onchange=e=>CFG.researchIntegrator=e.target.value;
+  document.getElementById('exportMap').onclick=exportResearchMap;document.getElementById('runMultiTurn').onclick=runMultiTurnResearch;document.getElementById('runValidation').onclick=runValidationSuite;document.getElementById('solveClosedOrbit').onclick=runClosedOrbitResearch;document.getElementById('normalModes').onclick=runNormalModesResearch;document.getElementById('runDynAperture').onclick=runDynamicApertureResearch;document.getElementById('runResonance').onclick=runResonanceResearch;
+}
+
+function updateInspector(){const body=document.getElementById('inspectorBody');if(!selected.length){body.innerHTML='<div class="inspect-block">Click a particle. Repeated clicks on the same particle increase the inspector from Level 1 through Level 6.</div>';document.getElementById('levelText').textContent='Level 1 · choose a particle';return}document.getElementById('levelText').textContent=`Levels ${selected.map(id=>levels.get(id)||1).join(' / ')}`;body.innerHTML=selected.map((id,si)=>levelBlock(id,si,levels.get(id)||1)).join('')}
+
+
+/* Dynamic phase-space view: keep the original index-1 boxes as the minimum,
+   but fit the current live particle cloud whenever nonlinear motion expands it.
+   The view stays centered on the physical reference orbit, so a small excursion
+   does not create a large asymmetric or unnecessary zoom-out. */
+function render(){if(frame>=frames.length)frame=Math.max(0,frames.length-1);particles=(frames[frame]?.particles||[]).map(q=>({...q}));updateDataSummary();updateHistory();drawPhase(document.getElementById('cxx'),'xx');drawPhase(document.getElementById('cyy'),'yy');drawPhase(document.getElementById('cxy'),'xy');drawPhase(document.getElementById('czd'),'zd');drawRF();draw3D();draw3DLat();drawTransport();drawDispersion();drawValidation();updatePickLayers();updateLatPick();renderCards();renderCyl();updateInspector();document.getElementById('frameTxt').textContent=`step ${frame} / ${Math.max(0,frames.length-1)}`;document.getElementById('sTxt').textContent=`s = ${finite(frames[frame]?.s,0).toFixed(3)} m · ${frames[frame]?.element||'Start'}`;document.getElementById('selTxt').textContent=selected.length?`selected: ${selected.map(i=>i+1).join(', ')}`:'selected: none';}
+function advance(){if(frames.length<=1){playing=false;return}if(frame>=frames.length-1){frame=0;for(const id of selected)history.set(id,[]);return}frame++;}
+function resetSim(){playing=false;frame=0;selected=[];levels=new Map();history=new Map();clearHeatCache();particles=(frames[0]?.particles||[]).map(q=>({...q}));document.getElementById('play').textContent='Play';render()}
+
+for(const [id,kind] of [['cxx','xx'],['cyy','yy'],['cxy','xy'],['czd','zd']]){const c=document.getElementById(id);addZoom(c,kind);c.addEventListener('click',ev=>{if(c._t&&performance.now()-c._t<700)return;selectNearest(c,kind,ev)});c.addEventListener('pointerdown',ev=>{if(ev.pointerType==='touch'){c._t=performance.now();selectNearest(c,kind,ev)}})}
+{const cl=document.getElementById('c3s');cl.addEventListener('click',ev=>{if(cl._t&&performance.now()-cl._t<700)return;selectLat(ev)});cl.addEventListener('pointerdown',ev=>{if(ev.pointerType==='touch'){cl._t=performance.now();selectLat(ev)}});cl.addEventListener('wheel',ev=>{ev.preventDefault();latZoom=clamp(latZoom*(ev.deltaY<0?1.18:1/1.18),0.25,6);render()},{passive:false});cl.addEventListener('dblclick',()=>{latZoom=1;render()});}
+{const c3=document.getElementById('c3d');c3.addEventListener('click',ev=>{if(c3._t&&performance.now()-c3._t<700)return;select3D(ev)});c3.addEventListener('pointerdown',ev=>{if(ev.pointerType==='touch'){c3._t=performance.now();select3D(ev)}});}
+
+document.getElementById('play').onclick=()=>{if(frame>=frames.length-1)frame=0;playing=!playing;document.getElementById('play').textContent=playing?'Pause':'Play'};
+document.getElementById('step').onclick=()=>{playing=false;document.getElementById('play').textContent='Play';advance();render()};
+document.getElementById('reset').onclick=resetSim;
+document.getElementById('resetZoom').onclick=()=>{for(const k of Object.keys(FULL))ZOOM[k]={x:[...FULL[k].x],y:[...FULL[k].y]};latZoom=1;render()};
+document.getElementById('speed').onchange=e=>speed=Number(e.target.value);
+document.getElementById('machine').onchange=e=>{machineKind=e.target.value;buildAll()};
+document.getElementById('opticsMode').onchange=()=>{buildAll()};
+document.getElementById('phaseSlider').oninput=e=>{phaseTargetDeg=Number(e.target.value);document.getElementById('phaseVal').textContent=`${phaseTargetDeg}°`;if(document.getElementById('opticsMode').value==='phase')buildAll()};
+document.getElementById('kSlider').oninput=e=>{document.getElementById('kVal').textContent=Number(e.target.value).toFixed(3);if(document.getElementById('opticsMode').value==='k')buildAll()};
+document.getElementById('bendTheta').onchange=e=>{CFG.fodoTheta=clamp(Number(e.target.value),10,300)*1e-3;buildAll()};
+document.getElementById('rfV').onchange=e=>{CFG.rfVoltageGeV=Math.max(0,Number(e.target.value));buildAll()};
+document.getElementById('phiS').onchange=e=>{CFG.synchronousPhase=Number(e.target.value);buildAll()};
+document.getElementById('dipL').onchange=e=>{CFG.dipoleLength=clamp(Number(e.target.value),.25,3);buildAll()};
+document.getElementById('ringCells').onchange=e=>{CFG.ringCells=clamp(Math.round(Number(e.target.value)),8,64);buildAll()};
+document.getElementById('energy').onchange=e=>{CFG.referenceEnergyGeV=clamp(Number(e.target.value),.05,20);buildAll()};
+document.getElementById('orbitKick').onchange=e=>{CFG.orbitKickMr=clamp(Number(e.target.value),-1,1);buildAll()};
+const showAll3DBox=document.getElementById('showAll3D');if(showAll3DBox)showAll3DBox.onchange=e=>{showAll3D=!!e.target.checked;render()};
+
+// ---- External particle-distribution import: CSV/TSV/TXT/JSON ----
+function normParticleHeader(v){
+  return String(v??'').replace(/^\uFEFF/,'').trim().toLowerCase()
+    .replace(/[′']/g,'prime').replace(/Δ/g,'delta').replace(/δ/g,'delta')
+    .replace(/[^a-z0-9]+/g,'');
+}
+function parseDelimitedLine(line,delim){
+  const out=[];let cur='',quote=false;
+  for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){if(quote&&line[i+1]==='"'){cur+='"';i++;}else quote=!quote;}else if(c===delim&&!quote){out.push(cur.trim());cur='';}else cur+=c;}
+  out.push(cur.trim());return out;
+}
+function chooseParticleColumn(headers,aliases){for(let i=0;i<headers.length;i++)if(aliases.includes(normParticleHeader(headers[i])))return i;return -1;}
+function particleUnitScale(header,kind,override){
+  if(override&&override!=='auto')return kind==='pos'?(override==='m'?1:override==='mm'?1e-3:1e-6):(override==='rad'?1:override==='mrad'?1e-3:1e-6);
+  const h=normParticleHeader(header);
+  if(kind==='pos'){if(h.includes('micron')||h.endsWith('um')||h.includes('microm'))return 1e-6;if(h.endsWith('mm')||h.includes('millimeter'))return 1e-3;return 1;}
+  if(h.includes('urad')||h.includes('microrad'))return 1e-6;if(h.includes('mrad')||h.includes('millirad'))return 1e-3;return 1;
+}
+function particleFieldMap(headers){
+  const aliases={
+    x:['x','xm','xmm','xum','xmicron','xmeters','xmeter'],
+    xp:['xp','xprime','xprad','xpmrad','xpurad','xprimemrad','xprimeurad','xangle','xanglemrad','xanglerad','xsloperad','xslopemrad'],
+    px:['px','pxp0','pxoverp0','pxnorm','pxnormalized','pxmrad','pxrad'],
+    y:['y','ym','ymm','yum','ymicron','ymeters','ymeter'],
+    yp:['yp','yprime','yprad','ypmrad','ypurad','yprimemrad','yprimeurad','yangle','yanglerad','yanglemrad','ysloperad','yslopemrad'],
+    py:['py','pyp0','pyoverp0','pynorm','pynormalized','pymrad','pyrad'],
+    z:['z','zm','zmm','zum','zmicron','zmeters','zmeter','longitudinalz'],
+    d:['delta','d','dpp','dpp0','deltapp0','deltapoverp0','dpoverp0','relativemomentumdeviation','momentumdeviation']
+  };
+  const out={};for(const k of Object.keys(aliases))out[k]=chooseParticleColumn(headers,aliases[k]);return out;
+}
+function normalizeImportedRows(rows,headers,units={}){
+  if(!rows.length)throw new Error('The file contains no particle rows.');
+  const f=particleFieldMap(headers);
+  if(Object.values(f).every(i=>i<0))throw new Error('No recognized particle columns found. Add headers such as x_mm,xp_mrad,y_mm,yp_mrad,z_mm,delta.');
+  const posOverride=units.position||units.positions||document.getElementById('particlePositionUnits')?.value||'auto';
+  const slopeOverride=units.slope||document.getElementById('particleSlopeUnits')?.value||'auto';
+  const mode=units.transverseMomentum||document.getElementById('particleMomentumMode')?.value||'auto';
+  const out=[];let skipped=0;
+  for(const row of rows){
+    const get=k=>{const i=f[k];if(i<0)return 0;const raw=row[i];if(raw===undefined||raw===null||String(raw).trim()==='')return 0;const n=Number(String(raw).trim());return Number.isFinite(n)?n:NaN;};
+    let x=get('x'),xp=get('xp'),px=get('px'),y=get('y'),yp=get('yp'),py=get('py'),z=get('z'),d=get('d');
+    if([x,xp,px,y,yp,py,z,d].some(v=>!Number.isFinite(v))){skipped++;continue;}
+    if(f.x>=0)x*=particleUnitScale(headers[f.x],'pos',posOverride);
+    if(f.y>=0)y*=particleUnitScale(headers[f.y],'pos',posOverride);
+    if(f.z>=0)z*=particleUnitScale(headers[f.z],'pos',posOverride);
+    if(f.xp>=0)xp*=particleUnitScale(headers[f.xp],'slope',slopeOverride);
+    else if(f.px>=0){px*=particleUnitScale(headers[f.px],'slope',mode==='slopes'?slopeOverride:'auto');xp=(mode==='slopes'||(mode==='auto'&&/mrad|urad|rad/i.test(headers[f.px])))?px:px/Math.max(1+d,1e-12);}
+    if(f.yp>=0)yp*=particleUnitScale(headers[f.yp],'slope',slopeOverride);
+    else if(f.py>=0){py*=particleUnitScale(headers[f.py],'slope',mode==='slopes'?slopeOverride:'auto');yp=(mode==='slopes'||(mode==='auto'&&/mrad|urad|rad/i.test(headers[f.py])))?py:py/Math.max(1+d,1e-12);}
+    if([x,xp,y,yp,z,d].some(v=>!Number.isFinite(v))) {skipped++;continue;}
+    out.push({x,xp,y,yp,z,d,alive:true,lossReason:'',imported:true});
+  }
+  if(out.length<1)throw new Error('No valid particle rows remain after parsing. Check the column names and numeric values.');
+  if(out.length>20000)throw new Error('This browser build is limited to 20,000 imported particles. Reduce the file size and retry.');
+  return {particles:out,skipped,fields:f,headers};
+}
+function parseParticleFileText(textContent,fileName){
+  const clean=String(textContent||'').replace(/^\uFEFF/,'').trim();if(!clean)throw new Error('The selected file is empty.');
+  if(/\.json$/i.test(fileName)||clean.startsWith('{')||clean.startsWith('[')){
+    const obj=JSON.parse(clean),arr=Array.isArray(obj)?obj:(obj.particles||obj.data||obj.coordinates);
+    if(!Array.isArray(arr)||!arr.length)throw new Error('JSON must be an array of particle objects or contain a particles/data array.');
+    const keys=[...new Set(arr.filter(v=>v&&typeof v==='object').flatMap(v=>Object.keys(v)))];
+    const rows=arr.filter(v=>v&&typeof v==='object').map(v=>keys.map(k=>v[k]));
+    const units=Array.isArray(obj)?{}:(obj.units||{});
+    return {...normalizeImportedRows(rows,keys,{position:units.position||units.positions||'auto',slope:units.slope||'auto',transverseMomentum:units.transverseMomentum||'auto'}),sourceFormat:'JSON'};
+  }
+  const lines=clean.split(/\r?\n/).map(l=>l.trim()).filter(l=>l&&!l.startsWith('#')&&!l.startsWith('!'));
+  if(lines.length<2)throw new Error('CSV/TSV needs a header row and at least one particle row.');
+  const first=lines[0],delim=first.includes('\t')?'\t':(first.includes(';')&&!first.includes(',')?';':',');
+  const headers=parseDelimitedLine(first,delim),rows=lines.slice(1).map(l=>parseDelimitedLine(l,delim));
+  return {...normalizeImportedRows(rows,headers),sourceFormat:delim==='\t'?'TSV':'CSV'};
+}
+function covarianceStats(a,b){
+  const n=a.length;if(n<2)return {meanA:a[0]||0,meanB:b[0]||0,rmsA:0,rmsB:0,cov:0,emit:0};
+  const ma=a.reduce((s,v)=>s+v,0)/n,mb=b.reduce((s,v)=>s+v,0)/n;let aa=0,bb=0,ab=0;
+  for(let i=0;i<n;i++){const x=a[i]-ma,y=b[i]-mb;aa+=x*x;bb+=y*y;ab+=x*y;}
+  aa/=n-1;bb/=n-1;ab/=n-1;return {meanA:ma,meanB:mb,rmsA:Math.sqrt(aa),rmsB:Math.sqrt(bb),cov:ab,emit:Math.sqrt(Math.max(0,aa*bb-ab*ab))};
+}
+function updateDataSummary(){
+  const el=document.getElementById('particleDataStatus');if(!el)return;
+  if(!importedInitial){el.textContent='Using the built-in matched Gaussian beam. No external particle file is active. The default distribution and all existing plots remain unchanged until a file is successfully loaded.';return;}
+  const live=particles.filter(q=>q.alive!==false);
+  if(!live.length){el.textContent=`Active file: ${importedFileName}\nNo live particles at this frame; inspect aperture and element settings.`;return;}
+  const xx=covarianceStats(live.map(q=>q.x),live.map(q=>q.xp)),yy=covarianceStats(live.map(q=>q.y),live.map(q=>q.yp)),zz=covarianceStats(live.map(q=>q.z),live.map(q=>q.d));
+  const mean=k=>live.reduce((a,q)=>a+(q[k]||0),0)/live.length;
+  const rms=k=>Math.sqrt(live.reduce((a,q)=>a+((q[k]||0)-mean(k))**2,0)/Math.max(1,live.length-1));
+  el.textContent=`ACTIVE DATA: ${importedFileName} · ${importedInitial.length} input particles · ${live.length} currently alive\nFrame ${frame}/${Math.max(0,frames.length-1)} · s=${finite(frames[frame]?.s,0).toFixed(4)} m · source columns normalized to SI units\nCurrent beam means: x=${(mean('x')*1e3).toFixed(5)} mm, y=${(mean('y')*1e3).toFixed(5)} mm, z=${(mean('z')*1e3).toFixed(5)} mm, δ=${mean('d').toExponential(4)}\nCurrent RMS: σx=${(rms('x')*1e3).toFixed(5)} mm, σx′=${(rms('xp')*1e3).toFixed(5)} mrad, σy=${(rms('y')*1e3).toFixed(5)} mm, σy′=${(rms('yp')*1e3).toFixed(5)} mrad, σz=${(rms('z')*1e3).toFixed(5)} mm, σδ=${rms('d').toExponential(4)}\nRMS geometric emittance: εx=${(xx.emit*1e6).toFixed(6)} mm·mrad, εy=${(yy.emit*1e6).toFixed(6)} mm·mrad · longitudinal RMS phase-space area=${(zz.emit*1e6).toFixed(6)} mm·δ`;
+}
+async function loadParticleDistribution(){
+  const input=document.getElementById('particleDataFile'),file=input?.files?.[0];
+  if(!file){alert('Choose a CSV, TSV, TXT, or JSON particle-distribution file first.');return;}
+  const btn=document.getElementById('loadParticleData');btn.disabled=true;btn.textContent='Reading…';
+  try{
+    const parsed=parseParticleFileText(await file.text(),file.name);
+    importedInitial=parsed.particles;importedFileName=file.name;selected=[];levels=new Map();history=new Map();frame=0;playing=false;clearHeatCache();
+    buildAll();document.getElementById('play').textContent='Play';
+    document.getElementById('particleDataStatus').textContent=`Loaded ${file.name}: ${parsed.particles.length} particles (${parsed.sourceFormat}). ${parsed.skipped?`Skipped ${parsed.skipped} nonnumeric row(s). `:''}Normalized coordinate/slope units to SI. Missing columns were set to zero.\nThe imported particles now replace the default beam at the lattice entrance; the current lattice, RF, magnets, tracking, plots, 3D paths, and diagnostics will be recalculated.`;
+  }catch(err){document.getElementById('particleDataStatus').textContent=`IMPORT FAILED — the current simulation has not been changed.\n${String(err?.message||err)}`;}
+  finally{btn.disabled=false;btn.textContent='Load & simulate data';}
+}
+document.getElementById('loadParticleData')?.addEventListener('click',loadParticleDistribution);
+document.getElementById('particleDataFile')?.addEventListener('change',()=>{
+  const f=document.getElementById('particleDataFile').files?.[0];
+  if(f)document.getElementById('particleDataStatus').textContent=`Selected ${f.name} (${(f.size/1024).toFixed(1)} KiB). Click “Load & simulate data” to validate and use it. The active simulation has not changed yet.`;
+});
+document.getElementById('clearParticleData')?.addEventListener('click',()=>{
+  importedInitial=null;importedFileName='';document.getElementById('particleDataFile').value='';selected=[];levels=new Map();history=new Map();frame=0;playing=false;clearHeatCache();buildAll();document.getElementById('play').textContent='Play';
+});
+
+wireResearchUI();
+const _bench=researchBenchmarks();
+if(_bench.bad.length) researchOutput('Initial lattice benchmark warnings: '+_bench.bad.map(x=>x[0]+'='+x[1].toExponential(2)).join(', '),'research-warn');
+
+function loop(now){const dt=Math.min(now-last,100);last=now;let changed=false;if(playing){acc+=dt*speed;while(acc>=25){acc-=25;const old=frame;advance();if(frame!==old)changed=true;else break;}}if(changed)render();requestAnimationFrame(loop)}
+
+/* ========================================================================
+   NONLINEAR RELATIVISTIC TRACKING ENGINE
+   Governing reference: F. Tecker, Longitudinal Beam Dynamics,
+   CERN-2014-009.1, 21 pages (published version; CC BY 4.0).
+
+   Design rule: the particle tracker never advances a particle with a
+   first-order transport matrix. Instead it integrates the relativistic
+   Lorentz equations with s as the independent variable. The extended state
+   includes time, making the RF-driven system autonomous in the augmented
+   state. Linear matrices remain only for the original optics/diagnostic views.
+
+   Tecker concepts represented here:
+     - Newton-Lorentz force and E^2 = E0^2 + p^2 c^2.
+     - RF acceleration with the full sinusoidal phase dependence.
+     - finite gap transit-time effect (not an imposed small-angle phase map).
+     - synchronous phase / phase stability.
+     - synchrotron motion, nonlinear RF bucket and separatrix.
+     - momentum compaction alpha and slip factor eta = 1/gamma^2 - alpha.
+     - transition energy gamma_tr = 1/sqrt(alpha).
+     - nonlinear amplitude-dependent synchrotron period and filamentation.
+     - Hamiltonian / canonical longitudinal diagnostic.
+     - adiabatic action conservation as a diagnostic during energy ramps.
+     - classical radiation reaction for relativistic electrons.
+
+   A stochastic photon-recoil option is intentionally labelled as an effective
+   Monte-Carlo recoil surrogate, not a full QED emission-spectrum solver.
+   ======================================================================== */
+
+CFG.rfGapLength = 0.10;
+CFG.rfMode = 'standing';
+CFG.sextupoleK2 = 0;
+CFG.octupoleK3 = 0;
+CFG.fringeFraction = 0.00;
+CFG.integrationStep = 0.020;
+CFG.aperture = 0.050;
+CFG.radiation = false;
+CFG.quantumRecoil = false;
+CFG.enableRFTransverse = true;
+
+const NL = {
+  qe: -1.602176634e-19,
+  me: 9.1093837015e-31,
+  eps0: 8.8541878128e-12,
+  hbar: 1.054571817e-34,
+  eVJ: 1.602176634e-19,
+  pi2: 2*Math.PI,
+  tiny: 1e-30
+};
+let referenceTimes=[];
+let referenceEnergies=[];
+let referenceMomentum=[];
+let trackingStates=[];
+let radiationDiagnostics=[];
+let nonlinearFrameDiagnostics=[];
+let nlCurrentMicro=-1;
+let numericalMapCache=null;
+let diagnosticBusy=false;
+let diagnosticMessage='pending';
+let lastBuildToken=0;
+let building=false;
+
+function energyGeVFromP(pSI){
+  const pcJ = Math.abs(pSI)*CFG.c;
+  const E0J = CFG.meGeV*1e9*NL.eVJ;
+  return Math.sqrt(Math.max(E0J*E0J + pcJ*pcJ,0))/NL.eVJ/1e9;
+}
+function totalEnergyJFromP(pSI){
+  const pc=Math.abs(pSI)*CFG.c,rest=CFG.meGeV*1e9*NL.eVJ;
+  return Math.sqrt(Math.max(rest*rest+pc*pc,0));
+}
+function momentumSIFromEnergyGeV(EGeV){
+  const E=Number(EGeV)*1e9*NL.eVJ,rest=CFG.meGeV*1e9*NL.eVJ;
+  if(E<=rest)return 0;
+  return Math.sqrt(Math.max(E*E-rest*rest,0))/CFG.c;
+}
+function betaGammaFromP(pSI){
+  const E=totalEnergyJFromP(pSI), rest=CFG.meGeV*1e9*NL.eVJ;
+  const gamma=Math.max(E/rest,1);
+  const beta=gamma>1?Math.sqrt(Math.max(1-1/(gamma*gamma),0)):0;
+  return {beta,gamma,EJ:E};
+}
+function normalized3(x,y,z){const n=Math.hypot(x,y,z);if(!(n>NL.tiny))return [0,0,1];return [x/n,y/n,z/n]}
+function dot3(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]}
+function cross3(a,b){return [a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]]}
+function add3(a,b){return [a[0]+b[0],a[1]+b[1],a[2]+b[2]]}
+function scale3(a,s){return [a[0]*s,a[1]*s,a[2]*s]}
+function sub3(a,b){return [a[0]-b[0],a[1]-b[1],a[2]-b[2]]}
+function wrap2pi(x){let y=x%(2*Math.PI);if(y<0)y+=2*Math.PI;return y}
+function wrapPhase(x){let y=(x+Math.PI)%(2*Math.PI);if(y<0)y+=2*Math.PI;return y-Math.PI}
+function sinc(x){return Math.abs(x)<1e-8?1-Math.pow(x,2)/6+Math.pow(x,4)/120:Math.sin(x)/x}
+function rfTravelWavenumber(freq){return 2*Math.PI*freq/CFG.c}
+
+/* For the ring, choose an integer harmonic using the actual ring circumference
+   including the finite RF cavity, then derive the exact revolution-synchronous RF. */
+effectiveRFFrequency = function(){
+  if(machineKind!=='ring')return CFG.rfFrequency;
+  const n=clamp(Math.round(CFG.ringCells),8,64);
+  const C=n*ringCell(kQ).reduce((a,e)=>a+e.L,0)+CFG.rfGapLength;
+  const {beta}=rel();
+  const h=Math.max(1,Math.round(CFG.rfFrequency*C/Math.max(beta*CFG.c,1)));
+  return h*beta*CFG.c/C;
+};
+
+/* Finite RF cavity: a smooth standing-wave gap is the default. The integral
+   of the field is what produces the energy gain, so the transit-time effect
+   emerges from particle motion rather than being inserted as a kick. */
+mkRF = function(name='RF cavity'){
+  return {type:'rf',L:clamp(Number(CFG.rfGapLength),0.02,5),VGeV:CFG.rfVoltageGeV,
+          freq:effectiveRFFrequency(),phiS:CFG.synchronousPhase,phase0:0,
+          mode:CFG.rfMode,name};
+};
+
+function rfGapProfile(u,L){
+  if(!(L>0))return {f:0,df:0};
+  const a=clamp(u/L,0,1);
+  const f=1-Math.cos(2*Math.PI*a);
+  const df=(2*Math.PI/L)*Math.sin(2*Math.PI*a);
+  return {f,df};
+}
+
+/* Expand each element into short integration slices, while retaining the
+   original index-1 visual lattice segmentation. */
+expandMachine = function(){
+  micro=[];totalS=0;
+  const targetStep=clamp(Number(CFG.integrationStep)||0.02,0.0002,0.05);
+  for(let ei=0;ei<elements.length;ei++){
+    const e=elements[ei];
+    if(e.L<=0){micro.push({...e,s:totalS,ds:0,elementIndex:ei,subIndex:0,nSub:1,localU0:0,elementL:0});continue;}
+    const minSlices=e.type==='quad'?8:e.type==='sbend'?12:e.type==='rf'?12:e.type==='solenoid'?10:6;
+    const n=Math.max(minSlices,Math.ceil(e.L/targetStep));
+    const ds=e.L/n;
+    for(let j=0;j<n;j++){
+      const u0=j*ds,u1=(j+1)*ds;
+      let VGeV=e.VGeV;
+      if(e.type==='rf'){
+        // Normalize the integrated standing-wave profile so slice kicks sum to the cavity voltage.
+        const L=e.L;
+        const integral=(u)=>u-L/(2*Math.PI)*Math.sin(2*Math.PI*u/L);
+        const weight=(integral(u1)-integral(u0))/L;
+        VGeV=e.VGeV*weight;
+      }
+      micro.push({...e,VGeV,s:totalS+u0,ds,elementIndex:ei,subIndex:j,nSub:n,localU0:u0,elementL:e.L});
+    }
+    totalS+=e.L;
+  }
+};
+
+function poseAtMicro(m,u){
+  const p0=referencePoses[m.globalMicroIndex>=0?m.globalMicroIndex:0] || {X:0,Y:0,Z:0,psi:0};
+  const uu=clamp(Number(u)||0,0,m.ds);
+  if(m.type==='sbend'){
+    const th=uu/m.rho,psi1=p0.psi+th;
+    return {X:p0.X+m.rho*(Math.cos(p0.psi)-Math.cos(psi1)),Y:p0.Y,
+            Z:p0.Z+m.rho*(Math.sin(psi1)-Math.sin(p0.psi)),psi:psi1};
+  }
+  return {X:p0.X+uu*Math.sin(p0.psi),Y:p0.Y,Z:p0.Z+uu*Math.cos(p0.psi),psi:p0.psi};
+}
+function basisFromPose(p){
+  const cp=Math.cos(p.psi),sp=Math.sin(p.psi);
+  return {ex:[cp,0,-sp],ey:[0,1,0],ez:[sp,0,cp]};
+}
+const fringeNormCache=new Map();
+/* Maxwell-compatible longitudinal smoothing for the ideal hard-edge model.
+   This is the standard Enge functional form (truncated to a symmetric 3-term
+   polynomial). It is still an analytic surrogate: a measured/3-D field map is
+   the machine-accurate option. */
+function rawFringeEnvelope(u,L){
+  const ff=clamp(CFG.fringeFraction,0,0.5);
+  if(!(ff>0)||!(L>0))return 1;
+  const w=Math.max(1e-5,L*ff);
+  const C0=-0.7,C1=1.0,C2=0.0;
+  const enge=(x)=>1/(1+Math.exp(C0+C1*x+C2*x*x));
+  const entrance=enge(u/w);
+  const exit=enge((L-u)/w);
+  return clamp(entrance*exit,0,1);
+}
+function normalizedFringeEnvelope(u,L){
+  if(!(L>0)||!(CFG.fringeFraction>0))return 1;
+  const key=L.toFixed(9)+'|'+clamp(CFG.fringeFraction,0,0.5).toFixed(6);
+  let norm=fringeNormCache.get(key);
+  if(norm===undefined){
+    const n=128,h=L/n;let sum=rawFringeEnvelope(0,L)+rawFringeEnvelope(L,L);
+    for(let i=1;i<n;i++)sum+=(i%2?4:2)*rawFringeEnvelope(i*h,L);
+    const integral=sum*h/3;norm=L/Math.max(integral,1e-30);fringeNormCache.set(key,norm);
+  }
+  return rawFringeEnvelope(clamp(u,0,L),L)*norm;
+}
+function referenceFieldParameters(m){
+  const pRef=(m.pRef&&m.pRef>0)?m.pRef:momentumSIFromEnergyGeV(CFG.referenceEnergyGeV);
+  const q=NL.qe;
+  let B0=0,G=0,S2=0,O3=0;
+  if(m.type==='sbend')B0=-pRef/(q*Math.max(Math.abs(m.rho),1e-12))*(Math.sign(m.rho)||1);
+  if(m.type==='quad')G=-m.k*pRef/q;
+  /* Accelerator convention: K_n are the coefficients appearing in the
+     transverse equations of motion. The magnetic multipole coefficients
+     therefore carry the same -p/q sign as K1 for the electron beam. */
+  S2=-CFG.sextupoleK2*pRef/q;
+  O3=-CFG.octupoleK3*pRef/q;
+  return {pRef,q,B0,G,S2,O3};
+}
+function localFields(m,st,u){
+  const pose=poseAtMicro(m,u),b=basisFromPose(pose),r=[st.rx,st.ry,st.rz];
+  const dr=sub3(r,[pose.X,pose.Y,pose.Z]),x=dot3(dr,b.ex),y=dot3(dr,b.ey),z=dot3(dr,b.ez);
+  const fp=normalizedFringeEnvelope(m.localU0+u,m.elementL||m.L||1);
+  let El=[0,0,0],Bl=[0,0,0];
+  const rp=referenceFieldParameters(m);
+  const fmap=fieldMapFor(m);
+  if(fmap){
+    const ef=fmap.E(x,y,z,st.t),bf=fmap.B(x,y,z,st.t);
+    return {E:ef,B:bf,pose,b,x,y,z};
+  }
+  if(CFG.useImportedFieldMap && CFG.importedFieldMap){
+    const ef=CFG.importedFieldMap.E(x,y,z,st.t),bf=CFG.importedFieldMap.B(x,y,z,st.t);
+    return {E:ef,B:bf,pose,b,x,y,z};
+  }
+  if(m.type==='quad'||m.type==='sbend'){
+    const [Bx0,By0]=multipoleFieldLocal(x,y,m,rp.pRef);
+    Bl=add3(scale3(b.ex,fp*Bx0),scale3(b.ey,fp*By0));
+  }
+  if(m.type==='solenoid'){
+    const env=CFG.fringeFraction>0 ? normalizedFringeEnvelope(m.localU0+u,m.elementL||m.L||1) : 1;
+    Bl=scale3(b.ez,(m.Bz||0)*env);
+  }
+  if(m.type==='rf'){
+    const prof=rfGapProfile(m.localU0+u,m.elementL||m.L||1);
+    const VGeV=Number(m.VGeV)||0;
+    const Epeak=VGeV*1e9/(Math.max(m.L,1e-12));
+    const omega=2*Math.PI*(Number(m.freq)||CFG.rfFrequency);
+    const ph=m.mode==='traveling'
+      ? omega*st.t - rfTravelWavenumber(m.freq)*z + (m.phase0||0)
+      : omega*st.t + (m.phase0||0);
+    const Ez=-Epeak*prof.f*Math.sin(ph); // q_e<0 -> positive energy gain for sin(phi)>0
+    El=scale3(b.ez,Ez);
+    if(CFG.enableRFTransverse){
+      /* Near-axis TM cavity focusing from the longitudinal field gradient:
+         E_perp ≈ -(r_perp/2) ∂Ez/∂s. This is a Maxwell-consistent on-axis
+         field model; measured 3-D field maps can replace it when available. */
+      let dEzds=-Epeak*prof.df*Math.sin(ph);
+      if(m.mode==='traveling')dEzds += -Epeak*prof.f*Math.cos(ph)*(-rfTravelWavenumber(m.freq));
+      El=add3(El,scale3(b.ex,-0.5*x*dEzds));
+      El=add3(El,scale3(b.ey,-0.5*y*dEzds));
+    }
+  }
+  return {E:El,B:Bl,pose,b,x,y,z};
+}
+function radiationForceLorentz(st,F,v,gamma){
+  if(!CFG.radiation)return [0,0,0];
+  const v2=dot3(v,v); if(!(v2>0)||!(gamma>1))return [0,0,0];
+  const m=NL.me, c=CFG.c, q4=Math.pow(Math.abs(NL.qe),4);
+  /* Derivative-free Landau–Lifshitz radiation reaction. The derivative term
+     requires ∂E/∂t and v·∇E from the field model; for the slowly varying static
+     lattice fields used here the dominant algebraic LL term is retained. */
+  const Ef=st._fieldE||[0,0,0], Bf=st._fieldB||[0,0,0];
+  const vCrossB=cross3(v,Bf), G=add3(Ef,vCrossB), vE=dot3(v,Ef);
+  const G2=dot3(G,G), scalar=Math.max(G2-vE*vE/(c*c),0);
+  const term=add3(add3(cross3(G,Bf),scale3(Ef,vE/(c*c))),
+                  add3(cross3(vCrossB,Bf),scale3(v,-scalar/(c*c))));
+  const coeff=q4/(6*Math.PI*NL.eps0*m*m*Math.pow(c,4));
+  const Fr=scale3(term,coeff);
+  if(Fr.every(Number.isFinite)){
+    st._radP=Math.max(0,-dot3(v,Fr));
+    return Fr;
+  }
+  st._radP=0; return [0,0,0];
+}
+function nlDeriv(st,m,u){
+  if(!st.alive)return {dr:[0,0,0],dp:[0,0,0],dt:0,dRadE:0};
+  const f=localFields(m,st,u),p=[st.px,st.py,st.pz],pm=Math.hypot(...p),bg=betaGammaFromP(pm);
+  if(!(pm>0)&&m.type!=='rf'){return {dr:[0,0,0],dp:[0,0,0],dt:0,dRadE:0,fail:'zero momentum'};}
+  const v=scale3(p,1/(bg.gamma*NL.me));
+  st._fieldE=f.E; st._fieldB=f.B;
+  const vs=dot3(v,f.b.ez);
+  if(!(vs>1e-6)||!Number.isFinite(vs))return {dr:[0,0,0],dp:[0,0,0],dt:0,dRadE:0,fail:'longitudinal velocity became non-positive'};
+  const Lorentz=scale3(add3(f.E,cross3(v,f.B)),NL.qe);
+  const Frad=radiationForceLorentz(st,Lorentz,v,bg.gamma);
+  const F=add3(Lorentz,Frad);
+  return {dr:scale3(v,1/vs),dp:scale3(F,1/vs),dt:1/vs,dRadE:(st._radP||0)/vs};
+}
+
+function applyQuantumRecoil(st,m){
+  if(!CFG.quantumRecoil||!CFG.radiation||!st.alive||!(st.radE>0))return;
+  const pMag=Math.hypot(st.px,st.py,st.pz),bg=betaGammaFromP(pMag),f=localFields(m,st,m.ds*0.5);
+  const Bperp=Math.hypot(f.B[0],f.B[1],f.B[2]);
+  if(!(Bperp>0)||!(bg.gamma>1))return;
+  const rho=pMag/(Math.abs(NL.qe)*Bperp);
+  const Ec=1.5*NL.hbar*Math.pow(bg.gamma,3)*CFG.c/Math.max(rho,1e-12);
+  const Emean=Math.max(0.44*Ec,1e-30),lambda=st.radE/Emean;
+  let n=0,L=Math.exp(-lambda),prod=1;while(prod>L&&n<10000){prod*=Math.max(rand(),1e-12);n++;}n=Math.max(0,n-1);
+  if(!n)return;
+  let recoil=0;for(let i=0;i<n;i++)recoil+=Math.min(-Emean*Math.log(Math.max(rand(),1e-12)),0.25*totalEnergyJFromP(pMag));
+  recoil=Math.min(recoil,0.5*totalEnergyJFromP(pMag)-0.5*CFG.meGeV*1e9*NL.eVJ);
+  if(!(recoil>0))return;
+  const Eold=totalEnergyJFromP(pMag),Enew=Math.max(CFG.meGeV*1e9*NL.eVJ,Eold-recoil),pnew=momentumSIFromEnergyGeV(Enew/NL.eVJ/1e9);
+  const scale=pnew/Math.max(pMag,1e-30);st.px*=scale;st.py*=scale;st.pz*=scale;st.quantumPhotons=(st.quantumPhotons||0)+n;
+}
+function apertureCheck(st,m,u=0){
+  const pose=m?poseAtMicro(m,u):{X:0,Y:0,Z:0,psi:0},b=basisFromPose(pose);
+  const dr=sub3([st.rx,st.ry,st.rz],[pose.X,pose.Y,pose.Z]);
+  const x=dot3(dr,b.ex),y=dot3(dr,b.ey);
+  const ax=Math.max(CFG.apertureX,1e-6),ay=Math.max(CFG.apertureY,1e-6);
+  let outside=false;
+  if(CFG.apertureShape==='ellipse') outside=(x/ax)**2+(y/ay)**2>1;
+  else if(CFG.apertureShape==='rectangle') outside=Math.abs(x)>ax||Math.abs(y)>ay;
+  else outside=Math.hypot(x,y)>ax;
+  if(outside){st.alive=false;st.lossReason='aperture';st.lossRadius=Math.hypot(x,y);st.lossX=x;st.lossY=y;}}
+
+function referenceRadiationLossGeV(m,EGeV){
+  if(!CFG.radiation || m.type!=='sbend')return 0;
+  const p=momentumSIFromEnergyGeV(EGeV),bg=betaGammaFromP(p),qAbs=Math.abs(NL.qe);
+  const rho=Math.max(Math.abs(m.rho),1e-12),v=bg.beta*CFG.c;
+  const B=p/(qAbs*rho);
+  const a=qAbs*v*Math.abs(B)/(bg.gamma*NL.me);
+  const P=qAbs*qAbs*Math.pow(bg.gamma,4)*a*a/(6*Math.PI*NL.eps0*Math.pow(CFG.c,3));
+  const dJ=P*m.ds/Math.max(v,1e-30);
+  return dJ/NL.eVJ/1e9;
+}
+
+function annotateReferenceSchedule(){
+  referenceTimes=[0];referenceEnergies=[CFG.referenceEnergyGeV];referenceMomentum=[momentumSIFromEnergyGeV(CFG.referenceEnergyGeV)];referencePoses=[];
+  let pose={X:0,Y:0,Z:0,psi:0};referencePoses.push({...pose});
+  let t=0,E=CFG.referenceEnergyGeV;
+  let sidx=0;
+  for(let i=0;i<micro.length;i++){
+    const m=micro[i],e=elements[m.elementIndex]||m;
+    m.globalMicroIndex=i;m.pRef=referenceMomentum[i]||momentumSIFromEnergyGeV(E);
+    const beta0=betaGammaFromP(m.pRef).beta;
+    if(m.type==='rf' && m.subIndex===0 && !e._phaseSet){
+      const omega=2*Math.PI*e.freq;
+      const tMid=t+(e.L/(2*Math.max(beta0*CFG.c,1e-30)));
+      e.phase0=e.phiS-omega*tMid;e._phaseSet=true;
+    }
+    if(m.type==='rf')m.phase0=e.phase0||0;
+    const pstart={...pose};
+    const bendTheta=m.type==='sbend'?m.ds/m.rho:0;
+    const poseEnd=advanceReferencePose(pose,{...m,ds:m.ds});
+    const betaBefore=beta0;
+    let dE=0;
+    if(m.type==='rf'){
+      /* Track the synchronous cavity gain with the same finite-gap field model
+         used by the particle ODE.  This avoids replacing the cavity by a thin
+         kick or by a signed/unsigned small-angle phase approximation. */
+      const omega=2*Math.PI*e.freq,tm=t+0.5*m.ds/Math.max(betaBefore*CFG.c,1e-30);
+      const prof=rfGapProfile(m.localU0+0.5*m.ds,e.L);
+      const ph=omega*tm+(e.phase0||0);
+      dE=e.VGeV*prof.f*Math.sin(ph)*(m.ds/Math.max(e.L,1e-30));
+      E=Math.max(CFG.meGeV*1.000001,E+dE);
+    }
+    const dErad=referenceRadiationLossGeV(m,E);
+    if(dErad>0)E=Math.max(CFG.meGeV*1.000001,E-dErad);
+    let betaAfter=betaGammaFromP(momentumSIFromEnergyGeV(E)).beta;
+    const betaAvg=Math.max((betaBefore+betaAfter)/2,1e-12);
+    t += m.ds/(betaAvg*CFG.c);
+    pose=poseEnd;
+    referencePoses.push({...pose});referenceTimes.push(t);referenceEnergies.push(E);referenceMomentum.push(momentumSIFromEnergyGeV(E));
+    if(m.type==='rf' && e._phaseSet && Math.abs(i)<0){ /* reserved */ }
+    sidx++;
+  }
+  for(const e of elements)delete e._phaseSet;
+}
+function omegaSinc(freq,L,beta){return sinc(Math.PI*freq*L/Math.max(beta*CFG.c,1e-30));}
+function rfTransitFactorSmooth(freq,L,beta,mode='standing'){
+  if(!(L>0)||!(freq>0)||!(beta>0))return 0;
+  const n=96,dt=L/n;let num=0,den=0;const w=2*Math.PI*freq/(beta*CFG.c);
+  for(let i=0;i<=n;i++){
+    const u=i*dt,a=u/L,prof=1-Math.cos(2*Math.PI*a),wt=(i===0||i===n)?1:(i%2?4:2);
+    const phaseOffset=mode==='traveling' ? -rfTravelWavenumber(freq)*(u-L/2) : 0;
+    num+=wt*prof*Math.cos(w*(u-L/2)+phaseOffset);den+=wt*prof;
+  }
+  return num/Math.max(den,1e-30);
+}
+
+function stateFromInitialQ(q){
+  const pose=referencePoses[0]||{X:0,Y:0,Z:0,psi:0},b=basisFromPose(pose),pRef=referenceMomentum[0]||momentumSIFromEnergyGeV(CFG.referenceEnergyGeV);
+  /* Exact kinematic initialization: x′=p_x/p_s and y′=p_y/p_s.
+     Do not normalize (x′,y′,1) as a direction and then call its magnitude p;
+     that makes the specified momentum magnitude depend on transverse angle. */
+  const pMag=Math.max(pRef*(1+q.d),pRef*1e-6);
+  const ps=pMag/Math.sqrt(1+q.xp*q.xp+q.yp*q.yp);
+  const plLocal=[q.xp*ps,q.yp*ps,ps];
+  const pl=add3(add3(scale3(b.ex,plLocal[0]),scale3(b.ey,plLocal[1])),scale3(b.ez,plLocal[2]));
+  const pos=add3([pose.X,pose.Y,pose.Z],add3(scale3(b.ex,q.x),add3(scale3(b.ey,q.y),scale3(b.ez,q.z))));
+  const bg=betaGammaFromP(pMag),t0=(referenceTimes[0]||0)-q.z/(Math.max(bg.beta*CFG.c,1e-30));
+  return {rx:pos[0],ry:pos[1],rz:pos[2],px:dot3(pl,b.ex),py:dot3(pl,b.ey),pz:dot3(pl,b.ez),t:t0,alive:true,radE:0,radEtotal:0,quantumPhotons:0};
+}
+function particleFromState(st,frameIndex){
+  const pose=referencePoses[frameIndex]||{X:0,Y:0,Z:0,psi:0},b=basisFromPose(pose);
+  const r=[st.rx,st.ry,st.rz],dr=sub3(r,[pose.X,pose.Y,pose.Z]);
+  const x=dot3(dr,b.ex),y=dot3(dr,b.ey),z=dot3(dr,b.ez);
+  const p=[st.px,st.py,st.pz],pm=Math.hypot(...p),bg=betaGammaFromP(pm),vs=dot3(p,b.ez)/(Math.max(bg.gamma*NL.me,1e-40));
+  const xp=dot3(p,b.ex)/Math.max(dot3(p,b.ez),1e-30),yp=dot3(p,b.ey)/Math.max(dot3(p,b.ez),1e-30);
+  const pRef=referenceMomentum[frameIndex]||momentumSIFromEnergyGeV(CFG.referenceEnergyGeV),EGeV=bg.EJ/NL.eVJ/1e9,Eref=referenceEnergies[frameIndex]||CFG.referenceEnergyGeV;
+  const rfFreq=(frames[frameIndex]?.rf?.freq)||effectiveRFFrequency();
+  const phi=wrapPhase(CFG.synchronousPhase+2*Math.PI*rfFreq*(st.t-(referenceTimes[frameIndex]||0)));
+  const d=(pm-pRef)/Math.max(pRef,1e-30),dE=EGeV-Eref;
+  const q={x,y,xp, y, yp,z,d,alive:!!st.alive,energyGeV:EGeV,energyOffsetGeV:dE,beta:bg.beta,gamma:bg.gamma,pSI:pm,time:st.t,dt:st.t-(referenceTimes[frameIndex]||0),phi,radE:st.radEtotal||0,quantumPhotons:st.quantumPhotons||0,lossReason:st.lossReason||''};
+  return q;
+}
+
+/* Compatibility entry point: the primary tracker is the canonical symplectic map builder above. */
+buildFrames = function(){ buildAll(); };
+
+/* Nonlinear exact phase-space diagnostic. */
+drawRF = function(){
+  const c=document.getElementById('crf'),ctx=c.getContext('2d'),w=c.width,h=c.height,p=44;
+  ctx.fillStyle='#0b1018';ctx.fillRect(0,0,w,h);drawAxes(ctx,w,h,ZOOM.rf.x,ZOOM.rf.y,'RF phase [rad]','normalized energy');
+  ctx.strokeStyle='#62d6ff';ctx.lineWidth=1.8;ctx.beginPath();
+  for(let i=0;i<=320;i++){const ph=-Math.PI+2*Math.PI*i/320,x=sx(ph,ZOOM.rf.x,w,p),y=sy(.5+.5*Math.sin(ph),ZOOM.rf.y,h,p);i?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.stroke();
+  for(let i=0;i<particles.length;i++){
+    const q=particles[i],ph=Number.isFinite(q.phi)?wrapPhase(q.phi):0,scale=Math.max(Math.abs(...particles.map(a=>a.energyOffsetGeV||0)),1e-6),en=clamp(.5+.5*(q.energyOffsetGeV||0)/scale,0,1),si=selected.indexOf(i);
+    if(q.alive===false)continue;ctx.beginPath();ctx.arc(sx(ph,ZOOM.rf.x,w,p),sy(en,ZOOM.rf.y,h,p),si>=0?5.5:2.3,0,2*Math.PI);ctx.fillStyle=si>=0?COLORS[si]:'rgba(255,255,255,.72)';ctx.fill();
+  }
+};
+
+function currentNonlinearFrame(){return nonlinearFrameDiagnostics[frame-1]||nonlinearFrameDiagnostics[0]||{s:0,refE:CFG.referenceEnergyGeV,refBeta:rel().beta}}
+function nonlinearBucketParams(){
+  const fr=currentNonlinearFrame(),eta=computeSlipFactorForFrame(frame),E=fr.refE,pSI=momentumSIFromEnergyGeV(E),R=Math.max(totalS/(2*Math.PI),1e-3),h=(machineKind==='ring'?Math.max(1,Math.round(effectiveRFFrequency()*Math.max(R*2*Math.PI,1)/(rel().beta*CFG.c))):1),omega=2*Math.PI*effectiveRFFrequency(),A=h*eta*omega/(Math.max(pSI*R,1e-30)),B=Math.abs(NL.qe)*CFG.rfVoltageGeV*1e9*NL.eVJ/(2*Math.PI*h),phiS=CFG.synchronousPhase,phiU=Math.PI-phiS;
+  return {eta,E,pSI,R,h,omega,A,B,phiS,phiU};
+}
+function bucketF(phi,p){return Math.cos(phi)-Math.cos(p.phiS)+(phi-p.phiS)*Math.sin(p.phiS)}
+function bucketSeparatrix(){
+  const p=nonlinearBucketParams();if(!(Math.abs(p.A)>1e-30)||!(p.B>0))return [];
+  const Hsep=p.B*bucketF(p.phiU,p),pts=[];
+  for(let i=0;i<=640;i++){
+    const phi=2*Math.PI*i/640,F=p.B*bucketF(phi,p),arg=2*(F-Hsep)/p.A;
+    if(arg>=0&&Number.isFinite(arg)){const W=Math.sqrt(arg),dEGeV=(W*p.omega)/NL.eVJ/1e9;pts.push({phi,dEGeV})}}
+  return pts;
+}
+function drawBucket(){
+  const c=document.getElementById('cBucket');if(!c)return;const ctx=c.getContext('2d'),w=c.width,h=c.height,pad=48;ctx.fillStyle='#0b1018';ctx.fillRect(0,0,w,h);
+  if(machineKind!=='ring'){ctx.fillStyle='#aeb9c9';ctx.font='12px system-ui';ctx.fillText('RF bucket / separatrix is a circular-accelerator diagnostic. Choose “Closed Ring Sector + RF”.',18,28);return;}
+  const bp=nonlinearBucketParams(),pts=bucketSeparatrix(),xs=[0,2*Math.PI];let maxE=0;
+  for(const q of particles)if(q.alive!==false)maxE=Math.max(maxE,Math.abs(q.energyOffsetGeV||0));for(const p of pts)maxE=Math.max(maxE,Math.abs(p.dEGeV));maxE=Math.max(maxE*1.12,0.0001);
+  const X=v=>pad+(v/(2*Math.PI))*(w-2*pad),Y=v=>h-pad-(v+maxE)/(2*maxE)*(h-2*pad);
+  ctx.strokeStyle='#394556';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad,h-pad);ctx.lineTo(w-pad,h-pad);ctx.lineTo(w-pad,pad);ctx.stroke();
+  ctx.fillStyle='#9da8b9';ctx.font='11px system-ui';ctx.textAlign='center';ctx.fillText('RF phase φ [rad]',w/2,h-10);ctx.save();ctx.translate(13,h/2);ctx.rotate(-Math.PI/2);ctx.fillText('ΔE relative to reference [GeV]',0,0);ctx.restore();
+  ctx.textAlign='left';ctx.fillText('0',pad,h-pad+15);ctx.textAlign='right';ctx.fillText((2*Math.PI).toFixed(2),w-pad,h-pad+15);ctx.textAlign='center';ctx.fillText('0',pad-10,Y(0)+4);ctx.fillText(maxE.toExponential(2),pad-8,Y(maxE)+4);ctx.fillText((-maxE).toExponential(2),pad-8,Y(-maxE)+4);
+  ctx.strokeStyle='rgba(220,230,245,.2)';ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(X(wrap2pi(bp.phiS)),pad);ctx.lineTo(X(wrap2pi(bp.phiS)),h-pad);ctx.stroke();ctx.beginPath();ctx.moveTo(pad,Y(0));ctx.lineTo(w-pad,Y(0));ctx.stroke();ctx.setLineDash([]);
+  if(pts.length){ctx.strokeStyle='#70e1a1';ctx.lineWidth=1.7;for(const sg of [-1,1]){ctx.beginPath();let started=false;for(const pt of pts){const xx=X(pt.phi),yy=Y(sg*pt.dEGeV);if(!started){ctx.moveTo(xx,yy);started=true}else ctx.lineTo(xx,yy)}ctx.stroke()}}
+  for(let i=0;i<particles.length;i++){const q=particles[i],si=selected.indexOf(i);if(q.alive===false)continue;const ph=wrap2pi(Number.isFinite(q.phi)?q.phi:bp.phiS),yy=Y(q.energyOffsetGeV||0);ctx.beginPath();ctx.arc(X(ph),yy,si>=0?5.6:2.5,0,2*Math.PI);ctx.fillStyle=si>=0?COLORS[si]:'rgba(255,255,255,.80)';ctx.fill();}
+  ctx.fillStyle='#aeb9c9';ctx.font='10px system-ui';ctx.textAlign='left';ctx.fillText(`η = ${bp.eta.toExponential(3)} · φs = ${bp.phiS.toFixed(4)} rad · γref = ${(EToGamma(bp.E)).toFixed(2)}`,pad,16);ctx.textAlign='right';ctx.fillText('green = Tecker separatrix diagnostic · white = tracked particles',w-pad,16);
+}
+function EToGamma(E){return E/CFG.meGeV}
+function computeSlipFactorForFrame(fi){
+  const fr=nonlinearFrameDiagnostics[fi-1]||nonlinearFrameDiagnostics[0]||{refE:CFG.referenceEnergyGeV};
+  const gamma=EToGamma(fr.refE);let alpha=NaN;
+  if(machineKind==='ring'){
+    const samples=dispersion||[];let sum=0,L=0;for(let i=0;i<Math.max(samples.length-1,0);i++){const a=samples[i],b=samples[i+1],ds=b.s-a.s,rho=localRadiusAtS(0.5*(a.s+b.s));if(Number.isFinite(rho)&&Math.abs(rho)<1e8&&rho!==0)sum+=0.5*(a.eta+b.eta)/rho*ds;L+=ds}alpha=L>0?sum/L:NaN;
+  }
+  if(!Number.isFinite(alpha)||alpha<=0){
+    const d=computeGeometricMomentumCompaction();alpha=d;
+  }
+  if(!(alpha>0))alpha=1e-3;
+  return 1/(gamma*gamma)-alpha;
+}
+function localRadiusAtS(s){
+  let best=null,bd=Infinity;for(const e of elements){if(e.type!=='sbend')continue;const ss=eStartOf(e),d=Math.abs((ss+e.L*0.5)-s);if(d<bd){bd=d;best=e.rho}}return best||Infinity;
+}
+function computeGeometricMomentumCompaction(){
+  let integral=0,C=0;for(const m of micro){C+=m.ds;if(m.type==='sbend'){const eta=(currentDispAtFrame(m.globalMicroIndex||0).eta||0);integral+=eta/m.rho*m.ds}}
+  return C>0?Math.abs(integral/C):0;
+}
+
+/* Diagnostics history now records exact RF phase and energy, while retaining
+   every field consumed by the original phase-space trajectory plots. */
+updateHistory = function(){
+  for(const id of selected){
+    if(!history.has(id))history.set(id,[]);const q=particles[id],pose=referencePoses[frame],P=pose?worldFromLocal(pose,q):{X:q.x,Y:q.y,Z:frames[frame]?.s||0};
+    const h=history.get(id);if(h.length&&h[h.length-1].f===frame)continue;
+    if(q.alive===false){const prev=frame>0?frames[frame-1]?.particles[id]:null;if(prev?.alive!==false){h.push({f:frame,s:frames[frame]?.s||0,x:q.x,xp:q.xp,y:q.y,yp:q.yp,z:q.z,d:q.d,X:P.X,Y:P.Y,Z:P.Z,phi:q.phi,energyOffsetGeV:q.energyOffsetGeV,beta:q.beta,gamma:q.gamma});}continue;}
+    h.push({f:frame,s:frames[frame]?.s||0,x:q.x,xp:q.xp,y:q.y,yp:q.yp,z:q.z,d:q.d,X:P.X,Y:P.Y,Z:P.Z,phi:q.phi,energyOffsetGeV:q.energyOffsetGeV,beta:q.beta,gamma:q.gamma});if(h.length>420)h.shift();
+  }
+};
+
+infoCard = function(id,kind){
+  const q=particles[id],si=selected.indexOf(id),o=opticalPointAtFrame(),a=actions(q,o),d=currentDispAtFrame();
+  return `<div class="card" style="border-color:${COLORS[si]}88"><div class="cardhead" style="color:${COLORS[si]}">e− #${id+1}</div><div class="grid2"><div><span class="tag">x:</span> ${(q.x*1000).toFixed(4)} mm</div><div><span class="tag">x′:</span> ${(q.xp*1000).toFixed(4)} mrad</div><div><span class="tag">y:</span> ${(q.y*1000).toFixed(4)} mm</div><div><span class="tag">y′:</span> ${(q.yp*1000).toFixed(4)} mrad</div><div><span class="tag">z:</span> ${(q.z*1000).toFixed(4)} mm</div><div><span class="tag">δ:</span> ${q.d.toExponential(3)}</div><div><span class="tag">E:</span> ${(q.energyGeV||0).toFixed(6)} GeV</div><div><span class="tag">φ:</span> ${(q.phi||0).toFixed(4)} rad</div></div><div class="small">η = ${(d.eta).toFixed(4)} m · nₓ = ${a.nx.toFixed(3)} · β = ${(q.beta||0).toFixed(9)} · γ = ${(q.gamma||0).toFixed(3)}</div></div>`;
+};
+
+levelBlock = function(id,si,level){
+  const q=particles[id],o=opticalPointAtFrame(),a=actions(q,o),c=cylindrical(q),d=currentDispAtFrame(),f=currentElement();
+  const bp=nonlinearBucketParams(),eta=computeSlipFactorForFrame(frame),E=Math.max(q.energyGeV||0,CFG.meGeV),lambdaDB=6.62607015e-34/(Math.max(q.pSI||0,1e-40))*1000,lambdaC=2.426310238e-12*1000;
+  const local=localFields(micro[Math.max(0,frame-1)]||{type:'drift',L:0,ds:0,localU0:0,elementL:0},0);
+  let html='<div class="inspect-block" style="border-color:'+COLORS[si]+'66">';
+  html+='<h3 style="color:'+COLORS[si]+'">Particle '+(id+1)+' · nonlinear Level '+level+'</h3>';
+  html+='<div class="inspect-value"><span>x / x′</span><b>'+fmt(q.x*1000,5)+' / '+fmt(q.xp*1000,5)+' mm·mrad</b></div>';
+  html+='<div class="inspect-value"><span>y / y′</span><b>'+fmt(q.y*1000,5)+' / '+fmt(q.yp*1000,5)+' mm·mrad</b></div>';
+  html+='<div class="inspect-value"><span>z / δ</span><b>'+fmt(q.z*1000,5)+' mm / '+q.d.toExponential(5)+'</b></div>';
+  html+='<div class="small">The tracked state is advanced with canonical paraxial element maps and nonlinear Hamiltonian kicks; it is not a full relativistic Lorentz field integration.</div>'; 
+  if(level>=2){
+    html+='<hr><div class="inspect-value"><span>β / γ</span><b>'+q.beta.toFixed(10)+' / '+q.gamma.toFixed(5)+'</b></div>';
+    html+='<div class="inspect-value"><span>total E / ΔE</span><b>'+q.energyGeV.toFixed(9)+' / '+q.energyOffsetGeV.toExponential(5)+' GeV</b></div>';
+    html+='<div class="inspect-value"><span>exact RF phase</span><b>'+q.phi.toFixed(6)+' rad</b></div>';
+    html+='<div class="inspect-value"><span>Jx / Jy / Jz</span><b>'+a.Jx.toExponential(5)+' / '+a.Jy.toExponential(5)+' / '+a.Jz.toExponential(5)+'</b></div>';
+    html+='<div class="small eq">E² = E₀² + p²c²; β = v/c; φ is derived from the tracked arrival time.</div>';
+  }
+  if(level>=3){
+    html+='<hr><div class="inspect-value"><span>r / transverse angle</span><b>'+fmt(c.r*1000,5)+' mm / '+fmt(c.deg,3)+'°</b></div>';
+    html+='<div class="inspect-value"><span>dr/ds / dφ⊥/ds</span><b>'+c.drds.toExponential(5)+' / '+c.dphids.toExponential(5)+' rad/m</b></div>';
+    html+='<div class="inspect-value"><span>de Broglie λ / Compton λ</span><b>'+lambdaDB.toExponential(4)+' mm / '+lambdaC.toExponential(4)+' mm</b></div>';
+    html+='<div class="small eq">r = √(x²+y²), φ⊥ = atan2(y,x), dr/ds = (xx′+yy′)/r, dφ⊥/ds = (xy′−yx′)/r²</div>';
+  }
+  if(level>=4){
+    html+='<hr><div class="inspect-value"><span>η / transition γ</span><b>'+eta.toExponential(5)+' / '+(eta<0?'above/ultra-relativistic side':'below / near-transition side')+'</b></div>';
+    html+='<div class="inspect-value"><span>local element</span><b>'+escapeHtml(f?f.name:'start')+'</b></div>';
+    html+='<div class="inspect-value"><span>RF gap model</span><b>'+CFG.rfMode+' · L = '+CFG.rfGapLength.toFixed(3)+' m</b></div>';
+    html+='<div class="inspect-value"><span>K₂ / K₃</span><b>'+CFG.sextupoleK2.toFixed(3)+' / '+CFG.octupoleK3.toFixed(3)+'</b></div>';
+    html+='<div class="small eq">η = 1/γ² − α; γtr = 1/√α. No θ ≈ sinθ or cosθ approximation is used in RF tracking.</div>';
+  }
+  if(level>=5){
+    html+='<hr><div class="inspect-value"><span>radiated energy / photons</span><b>'+((q.radE||0)/NL.eVJ/1e9).toExponential(5)+' GeV / '+(q.quantumPhotons||0)+'</b></div>';
+    html+='<div class="inspect-value"><span>aperture status</span><b>'+(q.alive===false?'LOST: '+escapeHtml(q.lossReason||'unknown'):'alive')+'</b></div>';
+    html+='<div class="small eq">Canonical paraxial tracking uses Hamiltonian element maps; the optional Lorentz-field and radiation models are not active in this symplectic build.</div>';
+  }
+  if(level>=6){
+    html+='<hr><div class="inspect-value"><span>RF Hamiltonian η</span><b>'+bp.eta.toExponential(5)+'</b></div>';
+    html+='<div class="inspect-value"><span>bucket harmonic h</span><b>'+bp.h+'</b></div>';
+    html+='<div class="inspect-value"><span>reference momentum</span><b>'+((bp.pSI*CFG.c)/NL.eVJ/1e9).toFixed(9)+' GeV/c</b></div>';
+    html+='<div class="small eq">H = eV̂/(2πh)[cosφ−cosφs+(φ−φs)sinφs] − ½[hηωrf/(p_sR_s)]W²,  W=ΔE/ωrf.</div>';
+    html+='<div class="small">The plotted green boundary is the constant-parameter Tecker separatrix diagnostic; the white/colored trajectories are the full nonlinear tracker.</div>';
+  }
+  html+='<div style="display:flex;gap:5px"><button class="deep-btn" onclick="goDeeper('+id+')">Go deeper →</button><button class="deep-btn" onclick="collapse('+id+')">Basics</button><button class="deep-btn" onclick="removeSel('+id+')">Remove</button></div></div>';
+  return html;
+};
+
+updateStatus = function(){
+  const st=document.getElementById('status');if(simError){st.className='status warn';st.textContent=`Simulation stopped safely at step ${Math.max(0,frames.length-1)}: ${simError}. Check aperture, integrator step, or element strengths.`;return;}
+  const fr=currentNonlinearFrame(),eta=computeSlipFactorForFrame(frame);st.className='status';st.textContent=`${machineKind==='ring'?'Closed ring':'Matched FODO'} · canonical symplectic nonlinear tracking · Eref = ${fr.refE.toFixed(6)} GeV · βref = ${fr.refBeta.toFixed(9)} · slip η = ${eta.toExponential(3)} · RF ${CFG.rfMode} · symplectic slice = ${(CFG.integrationStep*1000).toFixed(2)} mm · radiation/recoil disabled.`;
+  document.getElementById('phaseVal').textContent=`${((currentCell.tx?.mu||0)*180/Math.PI).toFixed(1)}°`;document.getElementById('kVal').textContent=kQ.toFixed(3);if(document.getElementById('fringeVal'))document.getElementById('fringeVal').textContent=`${Math.round(CFG.fringeFraction*100)}%`;
+};
+
+render = function(){
+  if(frame>=frames.length)frame=Math.max(0,frames.length-1);
+  particles=(frames[frame]?.particles||[]).map(q=>({...q}));
+  updateHistory();
+  drawPhase(document.getElementById('cxx'),'xx');drawPhase(document.getElementById('cyy'),'yy');
+  drawPhase(document.getElementById('cxy'),'xy');drawPhase(document.getElementById('czd'),'zd');
+  drawRF();drawBucket();draw3D();draw3DLat();drawTransport();drawDispersion();drawValidation();
+  updatePickLayers();updateLatPick();renderCards();renderCyl();updateInspector();
+  document.getElementById('frameTxt').textContent=`step ${frame} / ${Math.max(0,frames.length-1)}`;
+  document.getElementById('sTxt').textContent=`s = ${finite(frames[frame]?.s,0).toFixed(3)} m · ${frames[frame]?.element||'Start'}`;
+  document.getElementById('selTxt').textContent=selected.length?`selected: ${selected.map(i=>i+1).join(', ')}`:'selected: none';
+  if(!building)updateStatus();
+};
+/* Control bindings */
+if(document.getElementById('rfGapL'))document.getElementById('rfGapL').onchange=e=>{CFG.rfGapLength=clamp(Number(e.target.value),0.02,5);buildAll()};
+if(document.getElementById('rfMode'))document.getElementById('rfMode').onchange=e=>{CFG.rfMode=e.target.value;buildAll()};
+if(document.getElementById('sextK'))document.getElementById('sextK').onchange=e=>{CFG.sextupoleK2=clamp(Number(e.target.value),-500,500);buildAll()};
+if(document.getElementById('octK'))document.getElementById('octK').onchange=e=>{CFG.octupoleK3=clamp(Number(e.target.value),-5000,5000);buildAll()};
+if(document.getElementById('fringe'))document.getElementById('fringe').oninput=e=>{CFG.fringeFraction=clamp(Number(e.target.value)/100,0,.5);document.getElementById('fringeVal').textContent=`${Math.round(CFG.fringeFraction*100)}%`;buildAll()};
+if(document.getElementById('intStep'))document.getElementById('intStep').onchange=e=>{CFG.integrationStep=clamp(Number(e.target.value)/1000,.0002,.05);buildAll()};
+if(document.getElementById('aperture'))document.getElementById('aperture').onchange=e=>{CFG.aperture=clamp(Number(e.target.value)/1000,.001,.1);buildAll()};
+if(document.getElementById('radiation'))document.getElementById('radiation').onchange=e=>{CFG.radiation=!!e.target.checked;buildAll()};
+if(document.getElementById('quantumRecoil'))document.getElementById('quantumRecoil').onchange=e=>{CFG.quantumRecoil=!!e.target.checked;buildAll()};
+
+if(document.getElementById('apertureShape'))document.getElementById('apertureShape').onchange=e=>{CFG.apertureShape=e.target.value;render()};
+if(document.getElementById('solenoidB'))document.getElementById('solenoidB').onchange=e=>{CFG.solenoidFieldT=clamp(Number(e.target.value),-5,5);buildAll()};
+if(document.getElementById('solenoidL'))document.getElementById('solenoidL').onchange=e=>{CFG.solenoidLength=clamp(Number(e.target.value),.05,5);buildAll()};
+
+/* Stable phase-space view policy: all four phase-space plots use the same
+   addZoom() implementation and one build-time full-run envelope. */
+
+// Bootstrap after the nonlinear engine is defined; buildAll() computes the stable full-run ranges.
+buildAll();
+requestAnimationFrame(loop);
+
+</script>
+</body>
+</html>
